@@ -317,6 +317,7 @@ public class GuiMain {
 		frame.getContentPane().add(lblBer, gbc_lblBertotalWrongtotal);
 		
 		GridBagConstraints gbc_label_1BerValue = new GridBagConstraints();
+		gbc_label_1BerValue.anchor = GridBagConstraints.WEST;
 		gbc_label_1BerValue.insets = new Insets(0, 0, 0, 5);
 		gbc_label_1BerValue.gridx = 4;
 		gbc_label_1BerValue.gridy = 8;
