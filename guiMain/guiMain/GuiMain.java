@@ -23,8 +23,12 @@ import org.eclipse.wb.swing.FocusTraversalOnArray;
 public class GuiMain {
 
 	SerialPortManager serialPortManager = null;
+	ProtocolControl protocolManager = null;
+	//Thread protocolThread = null;
+
+
 	private JFrame frame;
-	
+
 	JLabel lblMainTitle = new JLabel("Underwater Communications");
 	JLabel lblDataOut = new JLabel("Data Out");
 	JLabel lblDataIn = new JLabel("Data In");
@@ -42,13 +46,13 @@ public class GuiMain {
 	JButton btnStartComm = new JButton("START COMM");
 	JButton btnStopComm = new JButton("STOP COMM");
 	JLabel lblBer = new JLabel("BER: ");
-	JLabel lblBerValue = new JLabel("0");
+	JLabel lblBerValue = new JLabel("0.0 %");
 	JTextArea textInputArea = new JTextArea();
 	JScrollPane scrollPaneInput = new JScrollPane();
 	JLabel lblControlPanel = new JLabel("Control Panel");
 	JTextArea textMsgArea = new JTextArea();
 	JScrollPane scrollPaneMsg = new JScrollPane();
-	
+
 
 	/**
 	 * Launch the application.
@@ -73,14 +77,19 @@ public class GuiMain {
 		initialize();
 		serialPortManager = new SerialPortManager(this);
 		serialPortManager.searchForPorts();
+		protocolManager = new ProtocolControl(this);
+		//protocolThread = new Thread(protocolManager, "Protocol_Manager");
+		//protocolManager.setRunCondition(true);
+		//System.out.println("GOT IN1");
+
 	}
-	
+
 	public void toggleControls(){
 		if (serialPortManager.getConnectionStatus()) {
-			
+
 			cboxPorts.setEnabled(false);
 			btnConnect.setEnabled(false);
-			
+
 			btnDisconnect.setEnabled(true);
 			btnStartComm.setEnabled(true);
 			btnStopComm.setEnabled(true);
@@ -90,7 +99,7 @@ public class GuiMain {
 		else {
 			cboxPorts.setEnabled(true);
 			btnConnect.setEnabled(true);
-			
+
 			btnDisconnect.setEnabled(false);
 			btnStartComm.setEnabled(false);
 			btnStopComm.setEnabled(false);
@@ -112,23 +121,23 @@ public class GuiMain {
 		gridBagLayout.columnWeights = new double[]{1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
 		gridBagLayout.rowWeights = new double[]{1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
-		
-		
+
+
 		GridBagConstraints gbc_lblUnderwaterCommunications = new GridBagConstraints();
 		gbc_lblUnderwaterCommunications.gridwidth = 8;
 		gbc_lblUnderwaterCommunications.insets = new Insets(0, 0, 5, 5);
 		gbc_lblUnderwaterCommunications.gridx = 0;
 		gbc_lblUnderwaterCommunications.gridy = 0;
 		frame.getContentPane().add(lblMainTitle, gbc_lblUnderwaterCommunications);
-		
+
 		GridBagConstraints gbc_lblControlPanel = new GridBagConstraints();
 		gbc_lblControlPanel.gridwidth = 2;
 		gbc_lblControlPanel.insets = new Insets(0, 0, 5, 5);
 		gbc_lblControlPanel.gridx = 0;
 		gbc_lblControlPanel.gridy = 1;
 		frame.getContentPane().add(lblControlPanel, gbc_lblControlPanel);
-		
-		
+
+
 		GridBagConstraints gbc_lblDataOut = new GridBagConstraints();
 		gbc_lblDataOut.gridwidth = 2;
 		gbc_lblDataOut.insets = new Insets(0, 0, 5, 5);
@@ -136,32 +145,32 @@ public class GuiMain {
 		gbc_lblDataOut.gridy = 1;
 		frame.getContentPane().add(lblDataOut, gbc_lblDataOut);
 		frame.getContentPane().setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{lblDataOut, lblDataIn, textOutputTest}));
-		
-		
+
+
 		GridBagConstraints gbc_lblDataIn = new GridBagConstraints();
 		gbc_lblDataIn.gridwidth = 2;
 		gbc_lblDataIn.insets = new Insets(0, 0, 5, 5);
 		gbc_lblDataIn.gridx = 5;
 		gbc_lblDataIn.gridy = 1;
 		frame.getContentPane().add(lblDataIn, gbc_lblDataIn);
-		
-		
+
+
 		GridBagConstraints gbc_lblSelectComm = new GridBagConstraints();
 		gbc_lblSelectComm.anchor = GridBagConstraints.EAST;
 		gbc_lblSelectComm.insets = new Insets(0, 0, 5, 5);
 		gbc_lblSelectComm.gridx = 0;
 		gbc_lblSelectComm.gridy = 2;
 		frame.getContentPane().add(lblSelectComm, gbc_lblSelectComm);
-		
-		
+
+
 		GridBagConstraints gbc_comboBox = new GridBagConstraints();
 		gbc_comboBox.insets = new Insets(0, 0, 5, 5);
 		gbc_comboBox.fill = GridBagConstraints.HORIZONTAL;
 		gbc_comboBox.gridx = 1;
 		gbc_comboBox.gridy = 2;
 		frame.getContentPane().add(cboxPorts, gbc_comboBox);
-		
-		
+
+
 		GridBagConstraints gbc_scrollPaneInput = new GridBagConstraints();
 		gbc_scrollPaneInput.gridwidth = 3;
 		gbc_scrollPaneInput.fill = GridBagConstraints.BOTH;
@@ -173,7 +182,7 @@ public class GuiMain {
 		textInputArea.setRows(9);
 		textInputArea.setColumns(10);
 		scrollPaneInput.setViewportView(textInputArea);
-		
+
 		GridBagConstraints gbc_scrollPaneMsg = new GridBagConstraints();
 		gbc_scrollPaneMsg.gridheight = 2;
 		gbc_scrollPaneMsg.fill = GridBagConstraints.BOTH;
@@ -185,7 +194,7 @@ public class GuiMain {
 		textMsgArea.setRows(2);
 		textMsgArea.setColumns(10);
 		scrollPaneMsg.setViewportView(textMsgArea);
-		
+
 		GridBagConstraints gbc_btnConnect = new GridBagConstraints();
 		gbc_btnConnect.insets = new Insets(0, 0, 5, 5);
 		gbc_btnConnect.gridx = 0;
@@ -204,7 +213,7 @@ public class GuiMain {
 				textOutputTest.setText("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 			}
 		});
-		
+
 		GridBagConstraints gbc_btnDisconnect = new GridBagConstraints();
 		gbc_btnDisconnect.insets = new Insets(0, 0, 5, 5);
 		gbc_btnDisconnect.gridx = 1;
@@ -217,15 +226,15 @@ public class GuiMain {
 				textOutputArea.setText("");
 			}
 		});
-		
-		
+
+
 		GridBagConstraints gbc_lblStringOut = new GridBagConstraints();
 		gbc_lblStringOut.insets = new Insets(0, 0, 5, 5);
 		gbc_lblStringOut.gridx = 0;
 		gbc_lblStringOut.gridy = 6;
 		frame.getContentPane().add(lblStringOut, gbc_lblStringOut);
-		
-		
+
+
 		textOutputTest.setText("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
 		GridBagConstraints gbc_outputText = new GridBagConstraints();
 		gbc_outputText.fill = GridBagConstraints.HORIZONTAL;
@@ -237,20 +246,20 @@ public class GuiMain {
 		textOutputTest.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent evt) {
-			//	if (evt.getSource() == textOutputTest) {
-					textOutputTest.setText("");
-			//	}
+				//	if (evt.getSource() == textOutputTest) {
+				textOutputTest.setText("");
+				//	}
 			}
 		});
-		
-		
+
+
 		GridBagConstraints gbc_lblArrow = new GridBagConstraints();
 		gbc_lblArrow.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArrow.gridx = 2;
 		gbc_lblArrow.gridy = 6;
 		frame.getContentPane().add(lblArrow, gbc_lblArrow);
-		
-		
+
+
 		GridBagConstraints gbc_scrollPaneOutput = new GridBagConstraints();
 		gbc_scrollPaneOutput.gridwidth = 2;
 		gbc_scrollPaneOutput.insets = new Insets(0, 0, 5, 5);
@@ -262,15 +271,15 @@ public class GuiMain {
 		scrollPaneOutput.setViewportView(textOutputArea);
 		textOutputArea.setRows(9);
 		textOutputArea.setColumns(10);
-		
-		
+
+
 		GridBagConstraints gbc_lblInterval = new GridBagConstraints();
 		gbc_lblInterval.insets = new Insets(0, 0, 5, 5);
 		gbc_lblInterval.gridx = 0;
 		gbc_lblInterval.gridy = 7;
 		frame.getContentPane().add(lblInterval, gbc_lblInterval);
-		
-		
+
+
 		textInterval.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusGained(FocusEvent e) {
@@ -284,11 +293,13 @@ public class GuiMain {
 		gbc_textInterval.gridy = 7;
 		frame.getContentPane().add(textInterval, gbc_textInterval);
 		textInterval.setColumns(10);
-		
-		
+
+
 		btnStartComm.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-					serialPortManager.sendData(textOutputTest.getText());
+				//serialPortManager.sendData(textOutputTest.getText());
+				//protocolManager.startComm();
+				serialPortManager.sendData(serialPortManager.msgTx);
 			}
 		});
 		GridBagConstraints gbc_btnStartComm = new GridBagConstraints();
@@ -297,7 +308,8 @@ public class GuiMain {
 		gbc_btnStartComm.gridx = 0;
 		gbc_btnStartComm.gridy = 8;
 		frame.getContentPane().add(btnStartComm, gbc_btnStartComm);
-		
+
+
 		btnStopComm.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 			}
@@ -308,14 +320,14 @@ public class GuiMain {
 		gbc_btnStopComm.gridx = 1;
 		gbc_btnStopComm.gridy = 8;
 		frame.getContentPane().add(btnStopComm, gbc_btnStopComm);
-		
+
 		GridBagConstraints gbc_lblBertotalWrongtotal = new GridBagConstraints();
 		gbc_lblBertotalWrongtotal.insets = new Insets(0, 0, 0, 5);
 		gbc_lblBertotalWrongtotal.anchor = GridBagConstraints.WEST;
 		gbc_lblBertotalWrongtotal.gridx = 3;
 		gbc_lblBertotalWrongtotal.gridy = 8;
 		frame.getContentPane().add(lblBer, gbc_lblBertotalWrongtotal);
-		
+
 		GridBagConstraints gbc_label_1BerValue = new GridBagConstraints();
 		gbc_label_1BerValue.anchor = GridBagConstraints.WEST;
 		gbc_label_1BerValue.insets = new Insets(0, 0, 0, 5);
