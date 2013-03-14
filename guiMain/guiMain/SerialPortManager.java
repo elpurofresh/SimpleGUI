@@ -174,30 +174,82 @@ public class SerialPortManager implements SerialPortEventListener{
 		this.bConnected = bConnected;
 	}
 
+	public boolean flagTx		= false;
+	public boolean flagACKTx 	= false;
+	public boolean flagEndData	= false;
+	public boolean flagACKEnd	= false;
+
+	public final String msgTx		= "[";
+	public final String msgACKTx	= "<";
+	public final String msgEndData 	= "]";
+	public final String msgACKEnd	= ">";
+	public final String msgACKFinal	= "?";
+
+	public final byte byteTx		= singleStringToBytesASCII(msgTx);
+	public final byte byteACKTx		= singleStringToBytesASCII(msgACKTx);
+	public final byte byteEndData	= singleStringToBytesASCII(msgEndData);
+	public final byte byteACKEnd 	= singleStringToBytesASCII(msgACKEnd);
+	public final byte byteACKFinal	= singleStringToBytesASCII(msgACKFinal);
+
 	public void serialEvent(SerialPortEvent spe) {
-		char[] end = new char[1];
-		end[0] = ']';
 
 		if (spe.getEventType() == SerialPortEvent.DATA_AVAILABLE) {//If one byte of data came in
 
 			try {
 				byte charVal = (byte)input.read();
+				String str = new String(new byte[] {(byte) charVal});
+				window.textInputArea.append(str);
+				System.out.println(str);
 
-				netText[byteCounter++] = charVal;
-				window.textInputArea.append(new String(new byte[] {(byte) charVal}));
+				//Receiver
+				if (charVal == byteTx && !window.protocolManager.isFlagACKTx()) {	//Rxd Send Request
+					window.protocolManager.setFlagACKTx(true);
+					window.protocolManager.setFlagRxMode(true);
+					sendData(msgACKTx);
+				}	
+				
+				if (charVal != byteEndData && window.protocolManager.isFlagACKTx()) { //Store data
+					//netText[byteCounter++] = charVal;
+					window.textInputArea.append(str);
+					
+					/*if (byteCounter > 38) {
+						byteCounter = 0;					
+						window.textInputArea.append("\n");
+					}*/
+				}
+				
+				if (charVal == byteEndData && window.protocolManager.isFlagACKTx()) {				//Rxd endData
+					window.protocolManager.setFlagACKTx(false);
+					sendData(msgACKEnd);
+				}
+				
+				//Transmitter
+				if (charVal == byteACKTx && !window.protocolManager.isFlagACKTx()) {	//Rxd Send Request
+					window.protocolManager.setFlagACKTx(true);
+					window.protocolManager.setFlagRxMode(false);
+					sendData(window.textOutputTest.getText());
+					sendData(msgEndData);
+				}
 
-				/*if (byteCounter > 38) {
-					byteCounter = 0;					
-					window.textInputArea.append("\n");
-				}*/
-				/*if (netText[byteCounter] == end[0]) {
-					for (int i = 0; i < netText.length; i++) {
-						String charToTest = new String(new byte[] {(byte) netText[i]});
-						if (window.textMsgArea.getText().compareTo(charToTest.charAt(0)) {
-							
-						}
+				if (charVal == byteACKEnd && window.protocolManager.isFlagACKTx()) {	//Rxd ACKSend
+					window.protocolManager.setFlagACKTx(false);
+					window.protocolManager.setFlagACKFinal(true);
+					sendData(msgACKEnd);
+				}
+				
+				if (charVal != byteACKFinal && window.protocolManager.isFlagACKFinal()) {
+					netText[byteCounter++] = charVal;
+					window.textInputArea.append(str);
+					
+					if (byteCounter > 38) {
+						byteCounter = 0;					
+						window.textInputArea.append("\n");
 					}
-				}*/
+				}
+				
+				if (charVal == byteACKFinal && window.protocolManager.isFlagACKFinal()) {
+					window.protocolManager.setFlagACKFinal(false);
+				}
 
 			} catch (Exception e) {
 				logText = "Failed to read data." + "(" + e.toString() + ")";
@@ -265,6 +317,10 @@ public class SerialPortManager implements SerialPortEventListener{
 		return b;
 	}
 
+	public static byte singleStringToBytesASCII(String str){
+		return (byte) str.charAt(0);
+	}
+
 	public void sendData(String dataToSend){
 
 		//int[] msgToChildren = new int[20]; 
@@ -275,12 +331,12 @@ public class SerialPortManager implements SerialPortEventListener{
 		byte[] dataBytesOut = stringToBytesASCII(dataToSend);
 
 		try {
-			output.write(START_BYTE);
+			//output.write(START_BYTE);
 			System.out.print("Data Sent: [");
 
 			window.textOutputArea.append("TxD-");
-			logText = new String(new byte[] {(byte) START_BYTE});
-			window.textOutputArea.append(logText);
+			//logText = new String(new byte[] {(byte) START_BYTE});
+			//window.textOutputArea.append(logText);
 
 			//output.write(dataToSend.getBytes());
 			//window.textOutputArea.append(new String(dataToSend.getBytes()));
@@ -294,13 +350,15 @@ public class SerialPortManager implements SerialPortEventListener{
 				//System.out.print(new String(new byte[] {(byte) msgToChildren[i]}));
 			}
 
-			output.write(STOP_BYTE); 
+			//output.write(STOP_BYTE); 
 			output.flush();
 			numTxD++;
 
-			logText = new String(new byte[] {(byte) STOP_BYTE});
-			window.textOutputArea.append(logText + "\n");
-			System.out.print(new String(new byte[] {STOP_BYTE}) + "\n");
+			//logText = new String(new byte[] {(byte) STOP_BYTE});
+			//window.textOutputArea.append(logText + "\n");
+			//System.out.print(new String(new byte[] {STOP_BYTE}) + "\n");
+			window.textOutputArea.append("\n");
+			System.out.print("\n");
 
 		} catch (Exception e) {
 			logText = "Failed to write data. (" + e.toString() + ")";
