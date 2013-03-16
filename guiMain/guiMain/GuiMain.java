@@ -299,7 +299,8 @@ public class GuiMain {
 			public void actionPerformed(ActionEvent arg0) {
 				//serialPortManager.sendData(textOutputTest.getText());
 				//protocolManager.startComm();
-				serialPortManager.sendData(serialPortManager.msgTx);
+				//serialPortManager.sendData(serialPortManager.msgTx);
+				serialPortManager.sendDataOneChar(textOutputTest.getText());
 			}
 		});
 		GridBagConstraints gbc_btnStartComm = new GridBagConstraints();
