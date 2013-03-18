@@ -24,7 +24,9 @@ public class GuiMain {
 
 	SerialPortManager serialPortManager = null;
 	ProtocolControl protocolManager = null;
-	//Thread protocolThread = null;
+	Thread threadMain = null;
+	ThreadManager threadManager = null;
+	FileReadWrite fileLogger = null;
 
 
 	private JFrame frame;
@@ -53,6 +55,7 @@ public class GuiMain {
 	JTextArea textMsgArea = new JTextArea();
 	JScrollPane scrollPaneMsg = new JScrollPane();
 
+	final String testMsg = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	/**
 	 * Launch the application.
@@ -81,6 +84,10 @@ public class GuiMain {
 		//protocolThread = new Thread(protocolManager, "Protocol_Manager");
 		//protocolManager.setRunCondition(true);
 		//System.out.println("GOT IN1");
+		fileLogger = new FileReadWrite(this);
+		threadManager = new ThreadManager(this);
+		threadMain = new Thread(threadManager, "Thread_Manager");
+		//threadMain.start();
 
 	}
 
@@ -210,7 +217,11 @@ public class GuiMain {
 						serialPortManager.initListener();
 					}
 				}
-				textOutputTest.setText("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+				textOutputTest.setText(testMsg);
+				if (!threadMain.isAlive()) {
+					threadMain.start();
+					threadManager.runCondition = true;
+				}
 			}
 		});
 
@@ -224,6 +235,13 @@ public class GuiMain {
 				serialPortManager.disconnect();
 				textInputArea.setText("");
 				textOutputArea.setText("");
+				try {
+					threadManager.runCondition = false;
+					threadMain.join();
+				} catch (InterruptedException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 			}
 		});
 
@@ -235,7 +253,7 @@ public class GuiMain {
 		frame.getContentPane().add(lblStringOut, gbc_lblStringOut);
 
 
-		textOutputTest.setText("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+		textOutputTest.setText(testMsg);
 		GridBagConstraints gbc_outputText = new GridBagConstraints();
 		gbc_outputText.fill = GridBagConstraints.HORIZONTAL;
 		gbc_outputText.insets = new Insets(0, 0, 5, 5);

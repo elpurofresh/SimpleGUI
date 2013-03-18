@@ -84,6 +84,9 @@ public class SerialPortManager implements SerialPortEventListener{
 
 	public boolean sendingData = false;
 	private long startTime = 0;
+	
+	private float numBytesRxdWrong = 0;
+	public final float numBytesSent = 36;
 
 	public SerialPortManager(GuiMain window){
 		this.window = window;
@@ -205,13 +208,14 @@ public class SerialPortManager implements SerialPortEventListener{
 					//System.out.println("Time: " + (System.currentTimeMillis() - startTime));
 					if (charVal != -1 && (System.currentTimeMillis() - startTime) > 100 ) {
 						if (charVal == '!') { //byteCounter > 36
-							byteCounter = 0;
 							window.textInputArea.append("\n");
 							System.out.print("\n");
+							refreshBERValue();
+							byteCounter = 0;
 						} else {
 							netText[byteCounter++] = charVal;
 							window.textInputArea.append(str);
-							System.out.print(new String(netText));
+							//System.out.print(new String(netText));
 						}
 					}
 
@@ -223,6 +227,22 @@ public class SerialPortManager implements SerialPortEventListener{
 				}
 			}
 		}
+	}
+	
+	public void refreshBERValue(){
+		float result = 0;
+		numBytesRxdWrong = 0;
+			
+		for (int i = 0; i < numBytesSent; i++) {
+			//System.out.println("Orig: " + (byte) window.testMsg.charAt(i)  + " Rxd: " + netText[i]);
+			if ( ((byte) window.testMsg.charAt(i)) != netText[i]) {
+				numBytesRxdWrong++;
+			}
+		}
+		result = (float) ((numBytesRxdWrong/numBytesSent)*100);
+		System.out.println(numBytesRxdWrong + " " + numBytesSent + " " + result);
+		window.lblBerValue.setText(result+ "%");
+		window.threadManager.setWriteDataToFile(true);
 	}
 
 	public static byte[] stringToBytesASCII(String str) {
@@ -244,7 +264,7 @@ public class SerialPortManager implements SerialPortEventListener{
 		try {
 			System.out.print("Data Sent: [");
 
-			window.textOutputArea.append("TxD-");
+			//window.textOutputArea.append("TxD-");
 
 			for (int i = 0; i < dataBytesOut.length; i++) {
 				output.write(dataBytesOut[i]);
