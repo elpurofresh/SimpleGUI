@@ -22,13 +22,15 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
+import java.awt.Color;
+import javax.swing.border.LineBorder;
 
 public class GuiMain {
 
 	SerialPortManager serialPortManager 	= null;
 	//ProtocolControl protocolManager 		= null;
 	NetworkProtocol networkProtocol			= null;
-	//GraphicalRep animation 					= null;
+	GraphicalRep animation 					= null;
 	Thread threadMainRx						= null;
 	Thread threadMainTx						= null;
 	Thread threadMainTx2					= null;
@@ -72,7 +74,7 @@ public class GuiMain {
 	private final JLabel lblParsedData = new JLabel("Parsed Data");
 	JTextArea textParsedArea = new JTextArea();
 	private final JScrollPane scrollPaneParsed = new JScrollPane();
-	private final JPanel panelGraph = new JPanel();
+	//private final JPanel panelGraph = new JPanel();
 	private final JLabel lblNetGraphRep = new JLabel("Network Graphical Representation");
 
 	private boolean startComm 			= false;
@@ -93,6 +95,8 @@ public class GuiMain {
 			public void run() {
 				try {
 					GuiMain window = new GuiMain();
+				//	window.animation.setLocale(null);
+					//window.animation.setVisible(true);
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -108,7 +112,10 @@ public class GuiMain {
 		serialPortManager = new SerialPortManager(this);
 		serialPortManager.searchForPorts();
 		networkProtocol = new NetworkProtocol(this);
-		//animation = new GraphicalRep(this);
+		animation = new GraphicalRep(this);
+		animation.setForeground(new Color(0, 0, 0));
+		animation.setBorder(new LineBorder(new Color(0, 0, 0)));
+		animation.setBackground(Color.WHITE);
 		//protocolManager = new ProtocolControl(this);
 		//protocolThread = new Thread(protocolManager, "Protocol_Manager");
 		//protocolManager.setRunCondition(true);
@@ -519,8 +526,10 @@ public class GuiMain {
 		gbc_panelGraph.fill = GridBagConstraints.BOTH;
 		gbc_panelGraph.gridx = 3;
 		gbc_panelGraph.gridy = 10;
-		frame.getContentPane().add(panelGraph, gbc_panelGraph);
-		//panelGraph.add(frameAnimation);
+		frame.getContentPane().add(animation, gbc_panelGraph);
+		/*System.out.println(animation.getPreferredSize());
+		animation.setSize(animation.getPreferredSize());
+		panelGraph.add(animation);*/
 	}
 
 	public boolean isStartComm() {
