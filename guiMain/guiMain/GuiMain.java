@@ -2,6 +2,7 @@ package guiMain;
 
 import java.awt.Component;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -14,6 +15,8 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
@@ -22,13 +25,19 @@ import org.eclipse.wb.swing.FocusTraversalOnArray;
 
 public class GuiMain {
 
-	SerialPortManager serialPortManager = null;
-	ProtocolControl protocolManager = null;
-	Thread threadMain = null;
-	ThreadManager threadManager = null;
-	FileReadWrite fileLogger = null;
-
-
+	SerialPortManager serialPortManager 	= null;
+	//ProtocolControl protocolManager 		= null;
+	NetworkProtocol networkProtocol			= null;
+	//GraphicalRep animation 					= null;
+	Thread threadMainRx						= null;
+	Thread threadMainTx						= null;
+	Thread threadMainTx2					= null;
+	Thread threadProtocol					= null;
+	ThreadManager threadManager 			= null;
+	FileReadWrite fileLogger 				= null;
+	ExperimentOne experOne					= null;
+	ExperimentTwo experTwo					= null;
+	
 	private JFrame frame;
 
 	JLabel lblMainTitle = new JLabel("Underwater Communications");
@@ -47,8 +56,7 @@ public class GuiMain {
 	JLabel lblInterval = new JLabel("Interval (sec):");
 	JButton btnStartComm = new JButton("START COMM");
 	JButton btnStopComm = new JButton("STOP COMM");
-	JLabel lblBer = new JLabel("BER: ");
-	JLabel lblBerValue = new JLabel("0.0 %");
+	JLabel lblBerValue = new JLabel("Bit Error Rate: 0.0 %");
 	JTextArea textInputArea = new JTextArea();
 	JScrollPane scrollPaneInput = new JScrollPane();
 	JLabel lblControlPanel = new JLabel("Control Panel");
@@ -56,6 +64,26 @@ public class GuiMain {
 	JScrollPane scrollPaneMsg = new JScrollPane();
 
 	final String testMsg = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	private final JLabel lblExperiment = new JLabel("Experiment #");
+	private final JPanel panelExperiment = new JPanel();
+	public final JRadioButton rdbtnExp1 = new JRadioButton("One");
+	public final JRadioButton rdbtnExp2 = new JRadioButton("Two");
+	public final JRadioButton rdbtnExp3 = new JRadioButton("Three");
+	private final JLabel lblParsedData = new JLabel("Parsed Data");
+	JTextArea textParsedArea = new JTextArea();
+	private final JScrollPane scrollPaneParsed = new JScrollPane();
+	private final JPanel panelGraph = new JPanel();
+	private final JLabel lblNetGraphRep = new JLabel("Network Graphical Representation");
+
+	private boolean startComm 			= false;
+	private boolean expOneSelected 		= false;
+	private boolean expTwoSelected 		= false;
+	private boolean expThreeSelected 	= false;
+	private final JPanel panelInterval = new JPanel();
+	public final JLabel lblNumberOfTests = new JLabel("Number of Tests: 0");
+	private final JPanel panelStringOut = new JPanel();
+	
+	
 
 	/**
 	 * Launch the application.
@@ -77,18 +105,24 @@ public class GuiMain {
 	 * Create the application.
 	 */
 	public GuiMain() {
-		initialize();
 		serialPortManager = new SerialPortManager(this);
 		serialPortManager.searchForPorts();
-		protocolManager = new ProtocolControl(this);
+		networkProtocol = new NetworkProtocol(this);
+		//animation = new GraphicalRep(this);
+		//protocolManager = new ProtocolControl(this);
 		//protocolThread = new Thread(protocolManager, "Protocol_Manager");
 		//protocolManager.setRunCondition(true);
 		//System.out.println("GOT IN1");
 		fileLogger = new FileReadWrite(this);
 		threadManager = new ThreadManager(this);
-		threadMain = new Thread(threadManager, "Thread_Manager");
+		//threadMain = new Thread(threadManager, "Thread_Manager");
 		//threadMain.start();
+		
+		experOne = new ExperimentOne(this);
+		experTwo = new ExperimentTwo(this);
+		initialize();
 
+		toggleControls();
 	}
 
 	public void toggleControls(){
@@ -102,6 +136,13 @@ public class GuiMain {
 			btnStopComm.setEnabled(true);
 			textOutputTest.setEnabled(true);
 			textInterval.setEnabled(true);
+			rdbtnExp1.setEnabled(true);
+			rdbtnExp1.setSelected(false);
+			rdbtnExp2.setEnabled(true);
+			rdbtnExp2.setSelected(false);
+			rdbtnExp3.setEnabled(true);
+			rdbtnExp3.setSelected(false);
+
 		}
 		else {
 			cboxPorts.setEnabled(true);
@@ -112,6 +153,17 @@ public class GuiMain {
 			btnStopComm.setEnabled(false);
 			textOutputTest.setEnabled(false);
 			textInterval.setEnabled(false);
+			lblNumberOfTests.setText("Number of Tests: 0");
+			
+			rdbtnExp1.setEnabled(false);
+			rdbtnExp1.setSelected(false);
+			rdbtnExp2.setEnabled(false);
+			rdbtnExp2.setSelected(false);
+			rdbtnExp3.setEnabled(false);
+			rdbtnExp3.setSelected(false);
+			setExpOneSelected(false);
+			setExpTwoSelected(false);
+			setExpThreeSelected(false);
 		}
 	}
 
@@ -120,19 +172,20 @@ public class GuiMain {
 	 */
 	private void initialize() {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 1037, 300);
+		frame.setBounds(100, 100, 1207, 605);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		GridBagLayout gridBagLayout = new GridBagLayout();
-		gridBagLayout.columnWidths = new int[]{178, 194, 0, 122, 169, 152, 93, 26};
-		gridBagLayout.rowHeights = new int[]{0, 0, 0, 0, 26, 0, 23, 31, 0, 0};
-		gridBagLayout.columnWeights = new double[]{1.0, 1.0, 0.0, 1.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{1.0, 0.0, 1.0, 0.0, 1.0, 0.0, 1.0, 1.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.columnWidths = new int[]{160, 80, 25, 200, 200, 200, 200};
+		gridBagLayout.rowHeights = new int[]{10, 5, 1, 85, 0, 0, 0, 5, 0, 0, 0, 0};
+		gridBagLayout.columnWeights = new double[]{0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0};
+		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, Double.MIN_VALUE};
 		frame.getContentPane().setLayout(gridBagLayout);
 
 
 		GridBagConstraints gbc_lblUnderwaterCommunications = new GridBagConstraints();
-		gbc_lblUnderwaterCommunications.gridwidth = 8;
-		gbc_lblUnderwaterCommunications.insets = new Insets(0, 0, 5, 5);
+		gbc_lblUnderwaterCommunications.gridwidth = 7;
+		gbc_lblUnderwaterCommunications.insets = new Insets(0, 0, 5, 0);
 		gbc_lblUnderwaterCommunications.gridx = 0;
 		gbc_lblUnderwaterCommunications.gridy = 0;
 		frame.getContentPane().add(lblMainTitle, gbc_lblUnderwaterCommunications);
@@ -151,12 +204,11 @@ public class GuiMain {
 		gbc_lblDataOut.gridx = 3;
 		gbc_lblDataOut.gridy = 1;
 		frame.getContentPane().add(lblDataOut, gbc_lblDataOut);
-		frame.getContentPane().setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{lblDataOut, lblDataIn, textOutputTest}));
 
 
 		GridBagConstraints gbc_lblDataIn = new GridBagConstraints();
 		gbc_lblDataIn.gridwidth = 2;
-		gbc_lblDataIn.insets = new Insets(0, 0, 5, 5);
+		gbc_lblDataIn.insets = new Insets(0, 0, 5, 0);
 		gbc_lblDataIn.gridx = 5;
 		gbc_lblDataIn.gridy = 1;
 		frame.getContentPane().add(lblDataIn, gbc_lblDataIn);
@@ -179,9 +231,9 @@ public class GuiMain {
 
 
 		GridBagConstraints gbc_scrollPaneInput = new GridBagConstraints();
-		gbc_scrollPaneInput.gridwidth = 3;
+		gbc_scrollPaneInput.gridwidth = 2;
 		gbc_scrollPaneInput.fill = GridBagConstraints.BOTH;
-		gbc_scrollPaneInput.gridheight = 6;
+		gbc_scrollPaneInput.gridheight = 5;
 		gbc_scrollPaneInput.insets = new Insets(0, 0, 5, 0);
 		gbc_scrollPaneInput.gridx = 5;
 		gbc_scrollPaneInput.gridy = 2;
@@ -191,7 +243,6 @@ public class GuiMain {
 		scrollPaneInput.setViewportView(textInputArea);
 
 		GridBagConstraints gbc_scrollPaneMsg = new GridBagConstraints();
-		gbc_scrollPaneMsg.gridheight = 2;
 		gbc_scrollPaneMsg.fill = GridBagConstraints.BOTH;
 		gbc_scrollPaneMsg.gridwidth = 2;
 		gbc_scrollPaneMsg.insets = new Insets(0, 0, 5, 5);
@@ -203,9 +254,10 @@ public class GuiMain {
 		scrollPaneMsg.setViewportView(textMsgArea);
 
 		GridBagConstraints gbc_btnConnect = new GridBagConstraints();
+		gbc_btnConnect.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnConnect.insets = new Insets(0, 0, 5, 5);
 		gbc_btnConnect.gridx = 0;
-		gbc_btnConnect.gridy = 5;
+		gbc_btnConnect.gridy = 4;
 		frame.getContentPane().add(btnConnect, gbc_btnConnect);
 		btnConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
@@ -218,17 +270,19 @@ public class GuiMain {
 					}
 				}
 				textOutputTest.setText(testMsg);
-				if (!threadMain.isAlive()) {
-					threadMain.start();
-					threadManager.runCondition = true;
-				}
+				
+				//Since a thread cannot be restarted we need to recreate the same object.
+				threadMainRx = new Thread(threadManager, "Thread_Manager");
+				threadMainRx.start();
+				threadManager.runCondition = true;
 			}
 		});
 
 		GridBagConstraints gbc_btnDisconnect = new GridBagConstraints();
+		gbc_btnDisconnect.fill = GridBagConstraints.HORIZONTAL;
 		gbc_btnDisconnect.insets = new Insets(0, 0, 5, 5);
 		gbc_btnDisconnect.gridx = 1;
-		gbc_btnDisconnect.gridy = 5;
+		gbc_btnDisconnect.gridy = 4;
 		frame.getContentPane().add(btnDisconnect, gbc_btnDisconnect);
 		btnDisconnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -237,122 +291,267 @@ public class GuiMain {
 				textOutputArea.setText("");
 				try {
 					threadManager.runCondition = false;
-					threadMain.join();
+					if (threadMainRx != null && threadMainRx.isAlive()) {
+						threadMainRx.join();
+					}
+					if (threadMainTx != null && threadMainTx.isAlive()) {
+						threadMainTx.join();
+					}
+					if (threadMainTx2 != null && threadMainTx2.isAlive()) {
+						threadMainTx2.join();
+					} 
+					if (threadProtocol != null && threadProtocol.isAlive()) {
+						threadProtocol.join();
+					}
 				} catch (InterruptedException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
 		});
-
-
-		GridBagConstraints gbc_lblStringOut = new GridBagConstraints();
-		gbc_lblStringOut.insets = new Insets(0, 0, 5, 5);
-		gbc_lblStringOut.gridx = 0;
-		gbc_lblStringOut.gridy = 6;
-		frame.getContentPane().add(lblStringOut, gbc_lblStringOut);
-
-
-		textOutputTest.setText(testMsg);
-		GridBagConstraints gbc_outputText = new GridBagConstraints();
-		gbc_outputText.fill = GridBagConstraints.HORIZONTAL;
-		gbc_outputText.insets = new Insets(0, 0, 5, 5);
-		gbc_outputText.gridx = 1;
-		gbc_outputText.gridy = 6;
-		frame.getContentPane().add(textOutputTest, gbc_outputText);
-		textOutputTest.setColumns(10);
-		textOutputTest.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent evt) {
-				//	if (evt.getSource() == textOutputTest) {
-				textOutputTest.setText("");
-				//	}
-			}
-		});
+		
+		GridBagConstraints gbc_panelStringOut = new GridBagConstraints();
+		gbc_panelStringOut.gridwidth = 2;
+		gbc_panelStringOut.insets = new Insets(0, 0, 5, 5);
+		gbc_panelStringOut.fill = GridBagConstraints.BOTH;
+		gbc_panelStringOut.gridx = 0;
+		gbc_panelStringOut.gridy = 5;
+		frame.getContentPane().add(panelStringOut, gbc_panelStringOut);
+		panelStringOut.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		panelStringOut.add(lblStringOut);
+		frame.getContentPane().setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{lblDataOut, lblDataIn, textOutputTest}));
+		panelStringOut.add(textOutputTest);
+		
+		
+				textOutputTest.setText(testMsg);
+				textOutputTest.setColumns(25);
+				textOutputTest.addFocusListener(new FocusAdapter() {
+					@Override
+					public void focusGained(FocusEvent evt) {
+						//	if (evt.getSource() == textOutputTest) {
+						textOutputTest.setText("");
+						//	}
+					}
+				});
 
 
 		GridBagConstraints gbc_lblArrow = new GridBagConstraints();
 		gbc_lblArrow.insets = new Insets(0, 0, 5, 5);
 		gbc_lblArrow.gridx = 2;
-		gbc_lblArrow.gridy = 6;
+		gbc_lblArrow.gridy = 5;
 		frame.getContentPane().add(lblArrow, gbc_lblArrow);
-
 
 		GridBagConstraints gbc_scrollPaneOutput = new GridBagConstraints();
 		gbc_scrollPaneOutput.gridwidth = 2;
 		gbc_scrollPaneOutput.insets = new Insets(0, 0, 5, 5);
 		gbc_scrollPaneOutput.fill = GridBagConstraints.BOTH;
-		gbc_scrollPaneOutput.gridheight = 6;
+		gbc_scrollPaneOutput.gridheight = 5;
 		gbc_scrollPaneOutput.gridx = 3;
 		gbc_scrollPaneOutput.gridy = 2;
 		frame.getContentPane().add(scrollPaneOutput, gbc_scrollPaneOutput);
 		scrollPaneOutput.setViewportView(textOutputArea);
 		textOutputArea.setRows(9);
 		textOutputArea.setColumns(10);
+		
+		GridBagConstraints gbc_panelInterval = new GridBagConstraints();
+		gbc_panelInterval.insets = new Insets(0, 0, 5, 5);
+		gbc_panelInterval.fill = GridBagConstraints.BOTH;
+		gbc_panelInterval.gridx = 0;
+		gbc_panelInterval.gridy = 6;
+		frame.getContentPane().add(panelInterval, gbc_panelInterval);
+		panelInterval.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+		panelInterval.add(lblInterval);
+		panelInterval.add(textInterval);
+		
+		
+				textInterval.addFocusListener(new FocusAdapter() {
+					@Override
+					public void focusGained(FocusEvent e) {
+					}
+				});
+				textInterval.setText("5");
+				textInterval.setColumns(5);
+		
+		GridBagConstraints gbc_lblNumberOfTests = new GridBagConstraints();
+		gbc_lblNumberOfTests.anchor = GridBagConstraints.WEST;
+		gbc_lblNumberOfTests.insets = new Insets(0, 0, 5, 5);
+		gbc_lblNumberOfTests.gridx = 1;
+		gbc_lblNumberOfTests.gridy = 6;
+		frame.getContentPane().add(lblNumberOfTests, gbc_lblNumberOfTests);
+
+		GridBagConstraints gbc_lblExperiment = new GridBagConstraints();
+		gbc_lblExperiment.insets = new Insets(0, 0, 5, 5);
+		gbc_lblExperiment.gridx = 0;
+		gbc_lblExperiment.gridy = 7;
+		frame.getContentPane().add(lblExperiment, gbc_lblExperiment);
+
+		GridBagConstraints gbc_panelExperiment = new GridBagConstraints();
+		gbc_panelExperiment.insets = new Insets(0, 0, 5, 5);
+		gbc_panelExperiment.fill = GridBagConstraints.HORIZONTAL;
+		gbc_panelExperiment.gridx = 1;
+		gbc_panelExperiment.gridy = 7;
+		frame.getContentPane().add(panelExperiment, gbc_panelExperiment);
+		panelExperiment.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 
 
-		GridBagConstraints gbc_lblInterval = new GridBagConstraints();
-		gbc_lblInterval.insets = new Insets(0, 0, 5, 5);
-		gbc_lblInterval.gridx = 0;
-		gbc_lblInterval.gridy = 7;
-		frame.getContentPane().add(lblInterval, gbc_lblInterval);
-
-
-		textInterval.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusGained(FocusEvent e) {
-			}
-		});
-		textInterval.setText("0");
-		GridBagConstraints gbc_textInterval = new GridBagConstraints();
-		gbc_textInterval.insets = new Insets(0, 0, 5, 5);
-		gbc_textInterval.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textInterval.gridx = 1;
-		gbc_textInterval.gridy = 7;
-		frame.getContentPane().add(textInterval, gbc_textInterval);
-		textInterval.setColumns(10);
-
-
-		btnStartComm.addActionListener(new ActionListener() {
+		rdbtnExp1.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				//serialPortManager.sendData(textOutputTest.getText());
-				//protocolManager.startComm();
-				//serialPortManager.sendData(serialPortManager.msgTx);
-				serialPortManager.sendDataOneChar(textOutputTest.getText());
+				rdbtnExp1.setSelected(true);
+				rdbtnExp2.setEnabled(false);
+				rdbtnExp2.setSelected(false);
+				rdbtnExp3.setEnabled(false);
+				rdbtnExp3.setSelected(false);
+				textMsgArea.append("Experiment 1 Selected: " + String.valueOf(rdbtnExp1.isSelected()) + '\n');	
+			}
+		});		
+		panelExperiment.add(rdbtnExp1);
+
+		rdbtnExp2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				rdbtnExp1.setEnabled(false);
+				rdbtnExp1.setSelected(false);
+				rdbtnExp3.setEnabled(false);
+				rdbtnExp3.setSelected(false);
+				textMsgArea.append("Experiment 2 Selected: " + String.valueOf(rdbtnExp2.isSelected()) + '\n');
 			}
 		});
+		panelExperiment.add(rdbtnExp2);
+
+		rdbtnExp3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				rdbtnExp1.setEnabled(false);
+				rdbtnExp1.setSelected(false);
+				rdbtnExp2.setEnabled(false);
+				rdbtnExp2.setSelected(false);
+				textMsgArea.append("Experiment 3 Selected: " + String.valueOf(rdbtnExp3.isSelected()) + '\n');
+			}
+		});		
+		panelExperiment.add(rdbtnExp3);
+
 		GridBagConstraints gbc_btnStartComm = new GridBagConstraints();
 		gbc_btnStartComm.fill = GridBagConstraints.HORIZONTAL;
-		gbc_btnStartComm.insets = new Insets(0, 0, 0, 5);
+		gbc_btnStartComm.insets = new Insets(0, 0, 5, 5);
 		gbc_btnStartComm.gridx = 0;
 		gbc_btnStartComm.gridy = 8;
 		frame.getContentPane().add(btnStartComm, gbc_btnStartComm);
+		btnStartComm.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				setStartComm(true);
 
+				if (rdbtnExp1.isSelected()) {
+					//serialPortManager.sendData(textOutputTest.getText());
+					//protocolManager.startComm();
+					//serialPortManager.sendData(serialPortManager.msgTx);
+					setExpOneSelected(true);
+					setExpTwoSelected(false);
+					setExpThreeSelected(false);
+					textMsgArea.append("Starting Experiment 1!!\n");
+					//serialPortManager.sendData(textOutputTest.getText());		
+					threadMainTx = new Thread(experOne, "Experiment_One");
+					threadMainTx.start();
 
-		btnStopComm.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+				} else if (rdbtnExp2.isSelected()) {
+					setExpOneSelected(false);
+					setExpTwoSelected(true);
+					setExpThreeSelected(false);
+					
+					textMsgArea.append("Starting Experiment 2!!\n");
+					threadMainTx2 = new Thread(experTwo, "Experiment_Two");
+					threadMainTx2.start();
+
+				} else if (rdbtnExp3.isSelected()) {
+					setExpOneSelected(false);
+					setExpTwoSelected(false);
+					setExpThreeSelected(true);
+					
+					textMsgArea.append("Starting Experiment 3!!\n");
+					threadProtocol = new Thread(networkProtocol, "Network_Protocol");
+					threadProtocol.start();
+				}
+
 			}
 		});
+
+
 		GridBagConstraints gbc_btnStopComm = new GridBagConstraints();
-		gbc_btnStopComm.fill = GridBagConstraints.BOTH;
-		gbc_btnStopComm.insets = new Insets(0, 0, 0, 5);
+		gbc_btnStopComm.fill = GridBagConstraints.HORIZONTAL;
+		gbc_btnStopComm.insets = new Insets(0, 0, 5, 5);
 		gbc_btnStopComm.gridx = 1;
 		gbc_btnStopComm.gridy = 8;
 		frame.getContentPane().add(btnStopComm, gbc_btnStopComm);
+		btnStopComm.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				setStartComm(false);
+			}
+		});
+		
+				GridBagConstraints gbc_label_1BerValue = new GridBagConstraints();
+				gbc_label_1BerValue.anchor = GridBagConstraints.WEST;
+				gbc_label_1BerValue.insets = new Insets(0, 0, 5, 5);
+				gbc_label_1BerValue.gridx = 3;
+				gbc_label_1BerValue.gridy = 8;
+				frame.getContentPane().add(lblBerValue, gbc_label_1BerValue);
 
-		GridBagConstraints gbc_lblBertotalWrongtotal = new GridBagConstraints();
-		gbc_lblBertotalWrongtotal.insets = new Insets(0, 0, 0, 5);
-		gbc_lblBertotalWrongtotal.anchor = GridBagConstraints.WEST;
-		gbc_lblBertotalWrongtotal.gridx = 3;
-		gbc_lblBertotalWrongtotal.gridy = 8;
-		frame.getContentPane().add(lblBer, gbc_lblBertotalWrongtotal);
+		GridBagConstraints gbc_lblParsedData = new GridBagConstraints();
+		gbc_lblParsedData.gridwidth = 3;
+		gbc_lblParsedData.insets = new Insets(0, 0, 5, 5);
+		gbc_lblParsedData.gridx = 0;
+		gbc_lblParsedData.gridy = 9;
+		frame.getContentPane().add(lblParsedData, gbc_lblParsedData);
 
-		GridBagConstraints gbc_label_1BerValue = new GridBagConstraints();
-		gbc_label_1BerValue.anchor = GridBagConstraints.WEST;
-		gbc_label_1BerValue.insets = new Insets(0, 0, 0, 5);
-		gbc_label_1BerValue.gridx = 4;
-		gbc_label_1BerValue.gridy = 8;
-		frame.getContentPane().add(lblBerValue, gbc_label_1BerValue);
+		GridBagConstraints gbc_lblNetGraphRep = new GridBagConstraints();
+		gbc_lblNetGraphRep.gridwidth = 4;
+		gbc_lblNetGraphRep.insets = new Insets(0, 0, 5, 0);
+		gbc_lblNetGraphRep.gridx = 3;
+		gbc_lblNetGraphRep.gridy = 9;
+		frame.getContentPane().add(lblNetGraphRep, gbc_lblNetGraphRep);
+
+		GridBagConstraints gbc_scrollPaneParsed = new GridBagConstraints();
+		gbc_scrollPaneParsed.fill = GridBagConstraints.BOTH;
+		gbc_scrollPaneParsed.gridwidth = 3;
+		gbc_scrollPaneParsed.insets = new Insets(0, 0, 0, 5);
+		gbc_scrollPaneParsed.gridx = 0;
+		gbc_scrollPaneParsed.gridy = 10;
+		frame.getContentPane().add(scrollPaneParsed, gbc_scrollPaneParsed);
+		scrollPaneParsed.setViewportView(textParsedArea);
+
+		GridBagConstraints gbc_panelGraph = new GridBagConstraints();
+		gbc_panelGraph.gridwidth = 4;
+		gbc_panelGraph.fill = GridBagConstraints.BOTH;
+		gbc_panelGraph.gridx = 3;
+		gbc_panelGraph.gridy = 10;
+		frame.getContentPane().add(panelGraph, gbc_panelGraph);
+		//panelGraph.add(frameAnimation);
 	}
 
+	public boolean isStartComm() {
+		return startComm;
+	}
+
+	public void setStartComm(boolean startComm) {
+		this.startComm = startComm;
+	}
+
+	public boolean isExpOneSelected() {
+		return expOneSelected;
+	}
+
+	public void setExpOneSelected(boolean expOneSelected) {
+		this.expOneSelected = expOneSelected;
+	}
+
+	public boolean isExpTwoSelected() {
+		return expTwoSelected;
+	}
+
+	public void setExpTwoSelected(boolean expTwoSelected) {
+		this.expTwoSelected = expTwoSelected;
+	}
+
+	public boolean isExpThreeSelected() {
+		return expThreeSelected;
+	}
+
+	public void setExpThreeSelected(boolean expThreeSelected) {
+		this.expThreeSelected = expThreeSelected;
+	}
 }

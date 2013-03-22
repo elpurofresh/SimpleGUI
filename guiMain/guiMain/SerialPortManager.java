@@ -46,7 +46,7 @@ public class SerialPortManager implements SerialPortEventListener{
 	//the timeout value for connecting with the port
 	final static int TIMEOUT = 2000;
 
-	//some ascii values for for certain things
+	//Some ascii values for for certain things
 	final static int SPACE_ASCII = 32;
 	final static int DASH_ASCII = 45;
 	final static int NEW_LINE_ASCII = 10;
@@ -84,9 +84,14 @@ public class SerialPortManager implements SerialPortEventListener{
 
 	public boolean sendingData = false;
 	private long startTime = 0;
-	
+
 	private float numBytesRxdWrong = 0;
 	public final float numBytesSent = 36;
+
+	private boolean pckStartFlag = false;
+
+	/*private int codeCnter = 6;
+	private final String keyCode = "[SEND]";*/
 
 	public SerialPortManager(GuiMain window){
 		this.window = window;
@@ -197,26 +202,37 @@ public class SerialPortManager implements SerialPortEventListener{
 
 		if (spe.getEventType() == SerialPortEvent.DATA_AVAILABLE) {//If one byte of data came in
 			while (!sendingData) {
-
 				try {
 					if (sendingData) {
 						break;
 					}
 					byte charVal = (byte) input.read();
-					String str = new String(new byte[] { (byte) charVal });
 
-					//System.out.println("Time: " + (System.currentTimeMillis() - startTime));
-					if (charVal != -1 && (System.currentTimeMillis() - startTime) > 100 ) {
+					if (charVal != -1 && (System.currentTimeMillis() - startTime) > 100 ) { //To avoid "listening(saving)" to own's message.
+						if (window.isExpOneSelected()) {
+							rxExperOne(charVal);
+						} 
+						else if (window.isExpTwoSelected()) {
+							rxExperTwo(charVal);
+						} else if (window.isExpThreeSelected()) {
+							rxExperThree(charVal);
+						}
+
+						/*String str = new String(new byte[] { (byte) charVal });
 						if (charVal == '!') { //byteCounter > 36
 							window.textInputArea.append("\n");
 							System.out.print("\n");
 							refreshBERValue();
 							byteCounter = 0;
+						} else if (charVal == '>') {
+							window.textInputArea.append(">");
+							byteCounter = 0;
+							window.textMsgArea.append("ACK Msg from Bot_B Rxd!\n");
 						} else {
 							netText[byteCounter++] = charVal;
 							window.textInputArea.append(str);
 							//System.out.print(new String(netText));
-						}
+						}*/
 					}
 
 				} catch (Exception e) {
@@ -228,11 +244,94 @@ public class SerialPortManager implements SerialPortEventListener{
 			}
 		}
 	}
-	
-	public void refreshBERValue(){
+
+	public void rxExperOne(byte val){
+		String str = new String(new byte[] { (byte) val });
+		if (val == '!') { 
+			window.textInputArea.append("\n");
+			System.out.print("\n");
+			refreshBERValue();
+			byteCounter = 0;
+		}  else {
+			netText[byteCounter++] = val;
+			window.textInputArea.append(str);
+			//System.out.print(new String(netText));
+		}
+
+	}
+
+	public void rxExperTwo(byte val){
+		String str = new String(new byte[] { (byte) val });
+
+		if(!pckStartFlag && val == '<'){
+			pckStartFlag = true;
+			byteCounter = 0;
+		}
+		else if (pckStartFlag && val != '>') {
+			netText[byteCounter++] = val;
+			window.textInputArea.append(str);
+			window.fileLogger.WriteData(netText);
+		}
+		else if (pckStartFlag && val == '>') {
+			pckStartFlag = false;
+			byteCounter = 0;
+			window.textInputArea.append("\n");
+		}
+
+		/*if (val == '>') { 
+			window.textInputArea.append("\n");
+			System.out.print("\n");
+			refreshBERValue();
+			byteCounter = 0;
+		} else if (val == '>') {
+			window.textInputArea.append(">");
+			byteCounter = 0;
+			window.textMsgArea.append("ACK Msg from Bot_B Rxd!\n");
+		} else {
+			netText[byteCounter++] = val;
+			window.textInputArea.append(str);
+			//System.out.print(new String(netText));
+		}*/
+	}
+
+	public void rxExperThree(byte val){
+		int[] msgToChildren = NetworkProtocol.msgToChildren;
+		String str = new String(new byte[] { (byte) val });
+
+		if (dataPacketFlag == false && val == START_BYTE) { //Stores start byte
+			dataPacketFlag = true;
+			netText[byteCounter++] = val;
+			window.textInputArea.append(str);
+		}
+
+		else if (dataPacketFlag == true  && val != STOP_BYTE) { //Stores actual data
+			window.textInputArea.append(logText);
+			netText[byteCounter++] = val;
+			window.fileLogger.WriteData(netText);
+		}
+
+		else if (dataPacketFlag == true && val == STOP_BYTE) { //Stores stop byte
+			dataPacketFlag = false;
+
+			if (netText[1] != msgToChildren[0]) { //botID parent...						
+				parseChildMsg(byteCounter);	
+				printChildMsg(byteCounter);
+				NetworkProtocol.setSuccessPcktRxd(true);
+				numRxD++;
+			} 
+
+			window.textInputArea.append(str);
+			window.textInputArea.append("\n");
+
+			byteCounter = 0;
+		}
+
+	}
+
+	public void refreshBERValue(){ //have to include the cases when sent and no response in calculation
 		float result = 0;
 		numBytesRxdWrong = 0;
-			
+
 		for (int i = 0; i < numBytesSent; i++) {
 			//System.out.println("Orig: " + (byte) window.testMsg.charAt(i)  + " Rxd: " + netText[i]);
 			if ( ((byte) window.testMsg.charAt(i)) != netText[i]) {
@@ -241,8 +340,9 @@ public class SerialPortManager implements SerialPortEventListener{
 		}
 		result = (float) ((numBytesRxdWrong/numBytesSent)*100);
 		System.out.println(numBytesRxdWrong + " " + numBytesSent + " " + result);
-		window.lblBerValue.setText(result+ "%");
-		window.threadManager.setWriteDataToFile(true);
+		window.lblBerValue.setText("Bit Error Rate: "+result+ "%");
+		//window.threadManager.setWriteDataToFile(true);
+		window.fileLogger.WriteData(netText);
 	}
 
 	public static byte[] stringToBytesASCII(String str) {
@@ -257,45 +357,15 @@ public class SerialPortManager implements SerialPortEventListener{
 		return (byte) str.charAt(0);
 	}
 
-	public void sendDataOneChar(String dataToSend){
-
-		byte[] dataBytesOut = stringToBytesASCII(dataToSend);
-
-		try {
-			System.out.print("Data Sent: [");
-
-			//window.textOutputArea.append("TxD-");
-
-			for (int i = 0; i < dataBytesOut.length; i++) {
-				output.write(dataBytesOut[i]);
-				window.textOutputArea.append(new String(new byte[] {(byte) dataBytesOut[i]}));
-				System.out.print(dataBytesOut[i]);
-			}
-
-			output.flush();
-			numTxD++;
-
-			window.textOutputArea.append("\n");
-			System.out.print("]\n");
-
-		} catch (Exception e) {
-			logText = "Failed to write data. (" + e.toString() + ")";
-			window.textOutputArea.setForeground(Color.red);
-			window.textOutputArea.append(logText + "\n");
-		}
-
-		startTime = System.currentTimeMillis();
-	}
-
 	public void sendData(String dataToSend){
 
 		byte[] dataBytesOut = stringToBytesASCII(dataToSend);
 
 		try {
-			System.out.print("Data Sent: [");
+			System.out.print("Data Sent: ");
 
-			window.textOutputArea.append("TxD-");
-			
+			//window.textOutputArea.append("TxD-");
+
 			for (int i = 0; i < dataBytesOut.length; i++) {
 				output.write(dataBytesOut[i]);
 				window.textOutputArea.append(new String(new byte[] {(byte) dataBytesOut[i]}));
@@ -313,12 +383,142 @@ public class SerialPortManager implements SerialPortEventListener{
 			window.textOutputArea.setForeground(Color.red);
 			window.textOutputArea.append(logText + "\n");
 		}
+
+		startTime = System.currentTimeMillis();
+	}
+	
+	public void sendData(int botID, int parent, int timeSlot){//, int packetSubTree){
+
+		window.networkProtocol.createDataPacket(botID, parent, timeSlot);//, packetSubTree);
+		int[] msgToChildren = NetworkProtocol.msgToChildren;
+
+		try {
+			output.write(START_BYTE);
+			System.out.print("Data Sent: [");
+			
+			window.textOutputArea.append("[");
+
+			for (int i = 0; i < msgToChildren.length; i++) {
+				output.write(msgToChildren[i]);
+				window.textOutputArea.append(new String(new byte[] {(byte) msgToChildren[i]}));
+				System.out.print(new String(new byte[] {(byte) msgToChildren[i]}));
+			}
+
+			output.write(STOP_BYTE); 
+			output.flush();
+			numTxD++;
+			
+			window.textOutputArea.append("]" + "\n");
+			
+			System.out.print(new String(new byte[] {STOP_BYTE}) + "\n");
+
+		} catch (Exception e) {
+			logText = "Failed to write data. (" + e.toString() + ")";
+			window.textOutputArea.setForeground(Color.red);
+			window.textOutputArea.append(logText + "\n");
+			//e.printStackTrace();
+		}
+	}
+
+	/*public void sendData(String dataToSend){
+
+		byte[] dataBytesOut = stringToBytesASCII(dataToSend);
+
+		try {
+			System.out.print("Data Sent: [");
+
+			window.textOutputArea.append("TxD-");
+
+			for (int i = 0; i < dataBytesOut.length; i++) {
+				output.write(dataBytesOut[i]);
+				window.textOutputArea.append(new String(new byte[] {(byte) dataBytesOut[i]}));
+				System.out.print(dataBytesOut[i]);
+			}
+
+			output.flush();
+			numTxD++;
+
+			window.textOutputArea.append("\n");
+			System.out.print("\n");
+
+		} catch (Exception e) {
+			logText = "Failed to write data. (" + e.toString() + ")";
+			window.textOutputArea.setForeground(Color.red);
+			window.textOutputArea.append(logText + "\n");
+		}
+	}*/
+
+	public void parseChildMsg(int byteCounter){
+		int cnter = 0;
+		int[] tmp = new int[2];
+		int packetBotID = -1;
+		int packetParent = -1;
+		int packetTimeSlot = -1;
+		
+		for (int i = 1; i < byteCounter; i++) {
+
+			if (i == 1) {
+				packetBotID = Integer.parseInt(new String(new byte[] {netText[i]})); //(int) netText[i] & 0xff;
+				//window.logAreaText.append("{" + NetworkProtocol.packetBotId + " " + Integer.parseInt(new String(new byte[] {netText[i]})) + "}");
+			} else if (i == 2) {
+				packetParent = (int) netText[i] & 0xff;
+			} else if (i == 3 || i == 4) {
+				tmp[cnter++] = Integer.parseInt(new String(new byte[] {netText[i]})); //new String(new byte[] {netText[i]}); //new String(new byte[] {netText[i]});//String.valueOf((int) netText[i] & 0xff);
+				//window.logAreaText.append("{" + cnter+ " " + netText[i] + " " + Integer.parseInt(new String(new byte[] {netText[i]})) + "}");
+
+				if (cnter == 2) {
+					packetTimeSlot = tmp[0]*10 + tmp[1];
+					//window.timeSlotValueLabel.setText(NetworkProtocol.myTimeSlotCounter + " / " + packetTimeSlot);
+					cnter = 0;
+				}
+			}
+		}
+		NetworkProtocol.queue.add(new Package(packetBotID, packetParent, packetTimeSlot));
 	}
 
 	public void printChildMsg(int byteCounter){
 
+		for (int i = 1; i < byteCounter; i++) {
+
+			if (i == 1 || i == 2 || i == 11) {				
+				window.textParsedArea.append(new String(new byte[] {netText[i]}) + " ");
+			} 
+
+			else if (i >= 3 && i <= 10 ) {
+				if (i == 3) {
+					window.textParsedArea.append(new String(new byte[] {netText[i]}));
+				}
+				else if (i == 4) {
+					window.textParsedArea.append(new String(new byte[] {netText[i]}) + "-");
+				} else {
+					if (i % 2 == 0) {//if even			
+						window.textParsedArea.append(new String(new byte[] {netText[i]}) + ": "); 
+					} else {
+						window.textParsedArea.append(new String(new byte[] {netText[i]}));
+					}
+				}
+
+			}
+
+			else if (i >= 12) {
+				if ((i - 12 )% 9 == 0) {
+					window.textParsedArea.append(new String(new byte[] {netText[i]}) + "-");
+				} else {
+					if (i % 2 == 0) {					
+						window.textParsedArea.append(new String(new byte[] {netText[i]}) + "::"); 
+					} else {
+						window.textParsedArea.append(new String(new byte[] {netText[i]}));
+					}
+				}
+			}
+		}
+		window.textParsedArea.append("\n");
+	}
+	
+	public void printChildMsg2(int byteCounter){
+
 		for (int i = 0; i < byteCounter; i++) {
-			window.textInputArea.append(new String(new byte[] {netText[i]}) + " ");
+			window.textParsedArea.append(new String(new byte[] {netText[i]}) + " ");
 		}
 		window.textInputArea.append("\n");
 	}

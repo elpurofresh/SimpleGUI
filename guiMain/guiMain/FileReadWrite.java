@@ -18,12 +18,13 @@ public class FileReadWrite {
 	DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 	Date date = new Date();
 
-	String outputFileName = "C:\\andres\\Code\\eclipseWorkspace\\SimpleGUI\\guiMain\\data\\berExperimentLog" + dateFormat.format(date) + ".txt";
-	File outputFile = new File(outputFileName);
+	//String outputFileNameExperOne 	= "C:\\andres\\Code\\eclipseWorkspace\\SimpleGUI\\guiMain\\data\\experOneLog" + dateFormat.format(date) + ".txt";
+	String outputFileNameExperTwo 	= "C:\\andres\\Code\\eclipseWorkspace\\SimpleGUI\\guiMain\\data\\experTwoLog" + dateFormat.format(date) + ".txt";
+	//String outputFileNameExperThree = "C:\\andres\\Code\\eclipseWorkspace\\SimpleGUI\\guiMain\\data\\experThreeLog" + dateFormat.format(date) + ".txt";
+	File outputFile = new File(outputFileNameExperTwo); 
 	Writer output = null; 
-
 	BufferedReader input = null;
-	
+
 	boolean firstWrite = true;
 
 	public FileReadWrite(GuiMain window){
@@ -33,12 +34,20 @@ public class FileReadWrite {
 
 	public void initialization()
 	{
+		/*if (window.isExpOneSelected()) {
+			outputFile = new File(outputFileNameExperOne);
+		} else if (window.isExpTwoSelected()) {
+			outputFile = new File(outputFileNameExperTwo);
+		} else if (window.isExpThreeSelected()) {
+			outputFile = new File(outputFileNameExperThree);
+		}*/
+		
 		try {
 			output = new BufferedWriter(new FileWriter(outputFile, true));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		System.out.println("Logging data to: " + outputFileName);
+		System.out.println("Logging data to: " + outputFile.getAbsolutePath());
 		/*
 		// This is done here so the header files are done once 
 		//without checking if there was a previous version of this file.
@@ -52,9 +61,9 @@ public class FileReadWrite {
 			e.printStackTrace();
 		}	*/
 	}
-	
+
 	public void WriteHeader(){
-		System.out.println("Logging data to: " + outputFileName);
+		System.out.println("Logging data to: " + outputFile.getAbsolutePath());
 
 		// This is done here so the header files are done once 
 		//without checking if there was a previous version of this file.
@@ -73,7 +82,7 @@ public class FileReadWrite {
 	public void WriteData(Package packageData){
 
 		try {
-			
+
 			if (firstWrite == true) {
 				output = new BufferedWriter(new FileWriter(outputFile, true));
 				output.write("BER Experimental Data\t" + dateFormat.format(date) + "\n");
@@ -81,13 +90,13 @@ public class FileReadWrite {
 				output.close();
 				firstWrite = false;
 			}
-			
+
 			output.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-	
+
 	// Writes the contents of packageData to the desired outputFile
 	public void WriteData(byte[] data){
 
@@ -102,6 +111,21 @@ public class FileReadWrite {
 			output.append('\n');
 			//output.flush();
 			output.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	// Writes the contents of packageData to the desired outputFile
+	public void WriteData(String text){
+
+		try {
+			//output = new BufferedWriter(new FileWriter(outputFile));
+			//output = new BufferedWriter(new FileWriter(outputFile, true));
+			output.append(text);
+			//output.append('\n');
+			output.flush();
+			//output.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
