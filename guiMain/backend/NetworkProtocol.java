@@ -1,4 +1,6 @@
-package guiMain;
+package backend;
+
+import gui.Gui;
 
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -7,7 +9,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class NetworkProtocol implements Runnable{
 
 	//passed from main GUI
-	GuiMain window = null;
+	Gui window = null;
 
 	private final static int MAX_NUM_PARAMS 	= 10;
 	//private final static int MasterNodeId 		= 0;	// '0'
@@ -57,7 +59,7 @@ public class NetworkProtocol implements Runnable{
 
 	private int timeResult = -1;
 
-	public NetworkProtocol(GuiMain window){
+	public NetworkProtocol(Gui window){
 		this.window = window;
 		initialization();
 	}

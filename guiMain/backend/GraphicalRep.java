@@ -1,4 +1,6 @@
-package guiMain;
+package backend;
+
+import gui.Gui;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -11,9 +13,9 @@ public class GraphicalRep extends JPanel{
 
 	private static final long serialVersionUID = 1709208790748660218L;
 
-	GuiMain window = null;
+	Gui window = null;
 	
-	public GraphicalRep(GuiMain window){
+	public GraphicalRep(Gui window){
 		super();
 		this.window = window;
 	}

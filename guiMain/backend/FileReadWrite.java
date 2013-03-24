@@ -1,4 +1,6 @@
-package guiMain;
+package backend;
+
+import gui.Gui;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -13,7 +15,7 @@ import java.util.Date;
 import java.util.StringTokenizer;
 
 public class FileReadWrite {
-	GuiMain window = null;
+	Gui window = null;
 
 	DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 	Date date = new Date();
@@ -27,7 +29,7 @@ public class FileReadWrite {
 
 	boolean firstWrite = true;
 
-	public FileReadWrite(GuiMain window){
+	public FileReadWrite(Gui window){
 		this.window = window;
 		initialization();
 	}

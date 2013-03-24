@@ -1,4 +1,4 @@
-package guiMain;
+package backend;
 
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
@@ -6,6 +6,7 @@ import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
+import gui.Gui;
 
 import java.awt.Color;
 import java.io.IOException;
@@ -22,7 +23,7 @@ import java.util.TooManyListenersException;
 public class SerialPortManager implements SerialPortEventListener{
 
 	//passed from main GUI
-	GuiMain window = null;
+	Gui window = null;
 
 	//for containing the ports that will be found
 	@SuppressWarnings("rawtypes")
@@ -93,7 +94,7 @@ public class SerialPortManager implements SerialPortEventListener{
 	/*private int codeCnter = 6;
 	private final String keyCode = "[SEND]";*/
 
-	public SerialPortManager(GuiMain window){
+	public SerialPortManager(Gui window){
 		this.window = window;
 	}
 

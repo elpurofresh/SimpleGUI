@@ -1,11 +1,12 @@
-package guiMain;
+package main;
 
+import gui.Gui;
 
-public class ExperimentOne implements Runnable{
+public class ExperimentTwo implements Runnable{
 	
-	GuiMain window = null;
+Gui window = null;
 	
-	public ExperimentOne(GuiMain window){
+	public ExperimentTwo(Gui window){
 		this.window = window;
 	}
 
@@ -14,17 +15,17 @@ public class ExperimentOne implements Runnable{
 		int numTests = 10;
 		int intervalTime = Integer.valueOf(window.textInterval.getText())*1000; //to convert to milliseconds
 		long timeBefore = System.currentTimeMillis();
-
+		
 		for (int i = 0; i < numTests; i++) {
-			window.serialPortManager.sendData(window.textOutputTest.getText());
+			window.serialPortManager.sendData("<Send>");//[Send]
 			while ((System.currentTimeMillis() - timeBefore) < intervalTime) {
 				//do nothing, just wait
 			}
 			timeBefore = System.currentTimeMillis();
 			window.lblNumberOfTests.setText("Number of Tests: " + Integer.toString(i+1));
 		}
-		window.textMsgArea.append("Finished Experiment 1!! \n");
-		window.setExpOneSelected(false);
+		window.textMsgArea.append("Finished Experiment 2!! \n");
+		window.setExpTwoSelected(false);
 		
 	}
 

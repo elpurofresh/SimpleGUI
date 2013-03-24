@@ -1,8 +1,10 @@
-package guiMain;
+package backend;
+
+import gui.Gui;
 
 public class ProtocolControl implements Runnable{
 
-	GuiMain window = null;
+	Gui window = null;
 	public boolean runCondition	= true;
 	public boolean flagTx		= false;
 	public boolean flagACKTx 	= false;
@@ -15,7 +17,7 @@ public class ProtocolControl implements Runnable{
 	public final String msgEndData 	= "]";
 	public final String msgACKEnd	= ">";
 
-	public ProtocolControl(GuiMain window){
+	public ProtocolControl(Gui window){
 		this.window = window;
 	}
 

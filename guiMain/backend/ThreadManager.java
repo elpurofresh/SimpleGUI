@@ -1,8 +1,10 @@
-package guiMain;
+package backend;
+
+import gui.Gui;
 
 public class ThreadManager implements Runnable{
 
-	GuiMain window = null;
+	Gui window = null;
 	
 	public boolean writeDataToFile = false;
 	public boolean runCondition = false;
@@ -10,7 +12,7 @@ public class ThreadManager implements Runnable{
 	//Thread threadRunner = null;
 	//ExperimentOne expOne = null;
 	
-	public ThreadManager(GuiMain window){
+	public ThreadManager(Gui window){
 		this.window = window;
 		//expOne = new ExperimentOne(window);
 	}

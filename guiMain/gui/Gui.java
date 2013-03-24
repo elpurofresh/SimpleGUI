@@ -1,4 +1,5 @@
-package guiMain;
+package gui;
+
 
 import java.awt.Component;
 import java.awt.EventQueue;
@@ -21,25 +22,22 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import main.ExperimentOne;
+import main.ExperimentTwo;
+
 import org.eclipse.wb.swing.FocusTraversalOnArray;
+
+import backend.FileReadWrite;
+import backend.GraphicalRep;
+import backend.NetworkProtocol;
+import backend.SerialPortManager;
+import backend.ThreadManager;
+
 import java.awt.Color;
 import javax.swing.border.LineBorder;
 
-public class GuiMain {
+public class Gui {
 
-	SerialPortManager serialPortManager 	= null;
-	//ProtocolControl protocolManager 		= null;
-	NetworkProtocol networkProtocol			= null;
-	GraphicalRep animation 					= null;
-	Thread threadMainRx						= null;
-	Thread threadMainTx						= null;
-	Thread threadMainTx2					= null;
-	Thread threadProtocol					= null;
-	ThreadManager threadManager 			= null;
-	FileReadWrite fileLogger 				= null;
-	ExperimentOne experOne					= null;
-	ExperimentTwo experTwo					= null;
-	
 	private JFrame frame;
 
 	JLabel lblMainTitle = new JLabel("Underwater Communications");
@@ -85,7 +83,7 @@ public class GuiMain {
 	public final JLabel lblNumberOfTests = new JLabel("Number of Tests: 0");
 	private final JPanel panelStringOut = new JPanel();
 	
-	
+	GraphicalRep animation 					= null;
 
 	/**
 	 * Launch the application.
@@ -94,7 +92,7 @@ public class GuiMain {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GuiMain window = new GuiMain();
+					Gui window = new Gui();
 				//	window.animation.setLocale(null);
 					//window.animation.setVisible(true);
 					window.frame.setVisible(true);
@@ -108,25 +106,12 @@ public class GuiMain {
 	/**
 	 * Create the application.
 	 */
-	public GuiMain() {
-		serialPortManager = new SerialPortManager(this);
-		serialPortManager.searchForPorts();
-		networkProtocol = new NetworkProtocol(this);
+	public Gui() {
+		
 		animation = new GraphicalRep(this);
 		animation.setForeground(new Color(0, 0, 0));
 		animation.setBorder(new LineBorder(new Color(0, 0, 0)));
 		animation.setBackground(Color.WHITE);
-		//protocolManager = new ProtocolControl(this);
-		//protocolThread = new Thread(protocolManager, "Protocol_Manager");
-		//protocolManager.setRunCondition(true);
-		//System.out.println("GOT IN1");
-		fileLogger = new FileReadWrite(this);
-		threadManager = new ThreadManager(this);
-		//threadMain = new Thread(threadManager, "Thread_Manager");
-		//threadMain.start();
-		
-		experOne = new ExperimentOne(this);
-		experTwo = new ExperimentTwo(this);
 		initialize();
 
 		toggleControls();
