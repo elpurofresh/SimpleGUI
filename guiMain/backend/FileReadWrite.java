@@ -15,7 +15,7 @@ import java.util.StringTokenizer;
 import main.Main;
 
 public class FileReadWrite {
-	Main window = null;
+	Main main = null;
 
 	DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 	Date date = new Date();
@@ -30,7 +30,7 @@ public class FileReadWrite {
 	boolean firstWrite = true;
 
 	public FileReadWrite(Main main){
-		this.window = main;
+		this.main = main;
 		initialization();
 	}
 
@@ -106,7 +106,7 @@ public class FileReadWrite {
 		try {
 			//output = new BufferedWriter(new FileWriter(outputFile));
 			output = new BufferedWriter(new FileWriter(outputFile, true));
-			for (int i = 0; i < window.serialPortManager.numBytesSent; i++) {
+			for (int i = 0; i < main.serialPortManager.numBytesSent; i++) {
 				str = new String(new byte[] { (byte) data[i] });
 				output.append(str);
 			}

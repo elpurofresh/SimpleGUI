@@ -101,12 +101,12 @@ public class Gui {
 	 */
 	public Gui(Main main) {
 		this.main = main;
-		animation = new GraphicalRep(this);
+		
+		animation = new GraphicalRep(main);
 		animation.setForeground(new Color(0, 0, 0));
 		animation.setBorder(new LineBorder(new Color(0, 0, 0)));
 		animation.setBackground(Color.WHITE);
 		initialize();
-
 		toggleControls();
 	}
 
@@ -159,6 +159,7 @@ public class Gui {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 1207, 605);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
 		
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{160, 80, 25, 200, 200, 200, 200};

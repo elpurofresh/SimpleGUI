@@ -8,15 +8,17 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
+import main.Main;
+
 public class GraphicalRep extends JPanel{
 
 	private static final long serialVersionUID = 1709208790748660218L;
 
-	Gui window = null;
+	Main main = null;
 	
-	public GraphicalRep(Gui window){
+	public GraphicalRep(Main main){
 		super();
-		this.window = window;
+		this.main = main;
 	}
 
 	//Main method

@@ -1,6 +1,5 @@
 package main;
 
-
 import gui.Gui;
 import backend.FileReadWrite;
 import backend.NetworkProtocol;
