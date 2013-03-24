@@ -1,15 +1,15 @@
 package backend;
 
-import gui.Gui;
-
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import main.Main;
+
 public class NetworkProtocol implements Runnable{
 
 	//passed from main GUI
-	Gui window = null;
+	Main main = null;
 
 	private final static int MAX_NUM_PARAMS 	= 10;
 	//private final static int MasterNodeId 		= 0;	// '0'
@@ -59,8 +59,8 @@ public class NetworkProtocol implements Runnable{
 
 	private int timeResult = -1;
 
-	public NetworkProtocol(Gui window){
-		this.window = window;
+	public NetworkProtocol(Main main){
+		this.main = main;
 		initialization();
 	}
 
@@ -74,18 +74,18 @@ public class NetworkProtocol implements Runnable{
 	}
 
 	public void reflectionTest(){
-		int rx = window.serialPortManager.getNumRxD();
-		int tx = window.serialPortManager.getNumTxD();
+		int rx = main.serialPortManager.getNumRxD();
+		int tx = main.serialPortManager.getNumTxD();
 		if (tx != 0) {
 			String text = String.valueOf(rx + "/" + tx + " = " + rx/tx);
 			//window.timeSlotValueLabel.setText(text);
-			window.fileLogger.WriteData("RxD/TxD Master Node Rate:\t" +text+ "\t\n");
+			main.fileLogger.WriteData("RxD/TxD Master Node Rate:\t" +text+ "\t\n");
 		}
 	}
 
 	public void run(){
 
-		while (window.serialPortManager.getConnectionStatus() == true) {
+		while (main.serialPortManager.getConnectionStatus() == true) {
 
 			//reflectionTest();
 
@@ -99,7 +99,7 @@ public class NetworkProtocol implements Runnable{
 						System.out.println("Result: " + timeResult);
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
-						System.out.println("Interval-> " + window.threadProtocol.getName() + " 's status is: " + window.threadProtocol.getState());
+						System.out.println("Interval-> " + main.threadProtocol.getName() + " 's status is: " + main.threadProtocol.getState());
 						//e.printStackTrace();						
 					}
 				}
@@ -140,7 +140,7 @@ public class NetworkProtocol implements Runnable{
 					}
 				} else {
 					if (myParent != NULL ) { //&& sendOnce <= 1
-						window.serialPortManager.sendData(myBotId, myParent, myTimeSlotCounter);//, mySubTreeDone);
+						main.serialPortManager.sendData(myBotId, myParent, myTimeSlotCounter);//, mySubTreeDone);
 						int timeSlotResult = myTimeSlotCounter % numNodes;
 						System.out.println("timeSlotResult: " +timeSlotResult);
 
@@ -156,7 +156,7 @@ public class NetworkProtocol implements Runnable{
 				}
 
 				if ((iAmALeaf == true || myChildrenSntDataSuccess == true) && (myTimeSlotCounter % numNodes) == myBotId) { // && sendOnce > 1
-					window.serialPortManager.sendData(myBotId, myParent, myTimeSlotCounter);//, mySubTreeDone);
+					main.serialPortManager.sendData(myBotId, myParent, myTimeSlotCounter);//, mySubTreeDone);
 
 				} else{
 
@@ -164,7 +164,7 @@ public class NetworkProtocol implements Runnable{
 
 						try {
 							receivedPackage = queue.take();
-							window.fileLogger.WriteData(receivedPackage);
+							main.fileLogger.WriteData(receivedPackage);
 
 						} catch (InterruptedException e) {
 							e.printStackTrace();

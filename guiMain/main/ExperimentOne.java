@@ -1,32 +1,29 @@
 package main;
 
-import gui.Gui;
-
-
 public class ExperimentOne implements Runnable{
 	
-	Gui window = null;
+	Main main = null;
 	
-	public ExperimentOne(Gui window){
-		this.window = window;
+	public ExperimentOne(Main main){
+		this.main = main;
 	}
 
 	@Override
 	public void run() {
 		int numTests = 10;
-		int intervalTime = Integer.valueOf(window.textInterval.getText())*1000; //to convert to milliseconds
+		int intervalTime = Integer.valueOf(main.gui.textInterval.getText())*1000; //to convert to milliseconds
 		long timeBefore = System.currentTimeMillis();
 
 		for (int i = 0; i < numTests; i++) {
-			window.serialPortManager.sendData(window.textOutputTest.getText());
+			main.serialPortManager.sendData(main.gui.textOutputTest.getText());
 			while ((System.currentTimeMillis() - timeBefore) < intervalTime) {
 				//do nothing, just wait
 			}
 			timeBefore = System.currentTimeMillis();
-			window.lblNumberOfTests.setText("Number of Tests: " + Integer.toString(i+1));
+			main.gui.lblNumberOfTests.setText("Number of Tests: " + Integer.toString(i+1));
 		}
-		window.textMsgArea.append("Finished Experiment 1!! \n");
-		window.setExpOneSelected(false);
+		main.gui.textMsgArea.append("Finished Experiment 1!! \n");
+		main.gui.setExpOneSelected(false);
 		
 	}
 

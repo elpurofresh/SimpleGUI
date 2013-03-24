@@ -1,10 +1,10 @@
 package backend;
 
-import gui.Gui;
+import main.Main;
 
 public class ProtocolControl implements Runnable{
 
-	Gui window = null;
+	Main main = null;
 	public boolean runCondition	= true;
 	public boolean flagTx		= false;
 	public boolean flagACKTx 	= false;
@@ -17,8 +17,8 @@ public class ProtocolControl implements Runnable{
 	public final String msgEndData 	= "]";
 	public final String msgACKEnd	= ">";
 
-	public ProtocolControl(Gui window){
-		this.window = window;
+	public ProtocolControl(Main main){
+		this.main = main;
 	}
 
 	@Override
@@ -30,26 +30,26 @@ public class ProtocolControl implements Runnable{
 
 			//Receiver
 			if (flagACKTx && flagRxMode) {
-				window.serialPortManager.sendData(msgACKTx);
+				main.serialPortManager.sendData(msgACKTx);
 				System.out.println(msgACKTx);
 				
 			} else if (!flagACKTx && flagRxMode) {
-				window.serialPortManager.sendData(msgACKEnd);
+				main.serialPortManager.sendData(msgACKEnd);
 				System.out.println(msgACKEnd);
 			}
 
 			//Transmitter
 			if (flagACKTx && !flagRxMode) {
-				window.serialPortManager.sendData(window.textOutputTest.getText());
-				window.serialPortManager.sendData(msgEndData);
-				System.out.println(window.textOutputTest.getText());
+				main.serialPortManager.sendData(main.gui.textOutputTest.getText());
+				main.serialPortManager.sendData(msgEndData);
+				System.out.println(main.gui.textOutputTest.getText());
 			}
 			System.out.println("GOT IN2" + runCondition);
 		}
 	}
 
 	public void startComm(){
-		window.serialPortManager.sendData(msgTx);
+		main.serialPortManager.sendData(msgTx);
 	}
 
 	public boolean isFlagTx() {

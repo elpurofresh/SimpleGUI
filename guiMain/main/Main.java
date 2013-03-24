@@ -1,33 +1,29 @@
 package main;
 
 
-import java.awt.Color;
-
-import javax.swing.border.LineBorder;
-
+import gui.Gui;
 import backend.FileReadWrite;
-import backend.GraphicalRep;
 import backend.NetworkProtocol;
 import backend.SerialPortManager;
 import backend.ThreadManager;
 
 public class Main {
 	
-	SerialPortManager serialPortManager 	= null;
-	//ProtocolControl protocolManager 		= null;
-	NetworkProtocol networkProtocol			= null;
+	public Gui	gui								= null;
+	public SerialPortManager serialPortManager 	= null;
+	public NetworkProtocol networkProtocol		= null;
+	public Thread threadMainRx					= null;
+	public Thread threadMainTx					= null;
+	public Thread threadMainTx2					= null;
+	public Thread threadProtocol				= null;
+	public ThreadManager threadManager 			= null;
+	public FileReadWrite fileLogger 			= null;
+	public ExperimentOne experOne				= null;
+	public ExperimentTwo experTwo				= null;
 	
-	Thread threadMainRx						= null;
-	Thread threadMainTx						= null;
-	Thread threadMainTx2					= null;
-	Thread threadProtocol					= null;
-	ThreadManager threadManager 			= null;
-	FileReadWrite fileLogger 				= null;
-	ExperimentOne experOne					= null;
-	ExperimentTwo experTwo					= null;
-	
-	public void Main(){
+	public Main(){
 		
+		gui = new Gui(this);
 		serialPortManager = new SerialPortManager(this);
 		serialPortManager.searchForPorts();
 		networkProtocol = new NetworkProtocol(this);
@@ -50,8 +46,7 @@ public class Main {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
+		new Main();
 	}
 
 }

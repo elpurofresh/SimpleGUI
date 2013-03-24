@@ -1,6 +1,5 @@
-package backend;
+package gui;
 
-import gui.Gui;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;

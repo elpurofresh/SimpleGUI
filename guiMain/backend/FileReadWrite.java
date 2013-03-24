@@ -14,8 +14,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.StringTokenizer;
 
+import main.Main;
+
 public class FileReadWrite {
-	Gui window = null;
+	Main window = null;
 
 	DateFormat dateFormat = new SimpleDateFormat("dd-MM-yyyy_HH-mm-ss");
 	Date date = new Date();
@@ -29,8 +31,8 @@ public class FileReadWrite {
 
 	boolean firstWrite = true;
 
-	public FileReadWrite(Gui window){
-		this.window = window;
+	public FileReadWrite(Main main){
+		this.window = main;
 		initialization();
 	}
 

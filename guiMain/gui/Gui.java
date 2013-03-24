@@ -1,8 +1,7 @@
 package gui;
 
-
+import java.awt.Color;
 import java.awt.Component;
-import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -21,74 +20,67 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.border.LineBorder;
 
-import main.ExperimentOne;
-import main.ExperimentTwo;
+import main.Main;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
-import backend.FileReadWrite;
-import backend.GraphicalRep;
-import backend.NetworkProtocol;
-import backend.SerialPortManager;
-import backend.ThreadManager;
-
-import java.awt.Color;
-import javax.swing.border.LineBorder;
-
 public class Gui {
+	
+	Main main = null;
 
 	private JFrame frame;
 
-	JLabel lblMainTitle = new JLabel("Underwater Communications");
-	JLabel lblDataOut = new JLabel("Data Out");
-	JLabel lblDataIn = new JLabel("Data In");
-	JLabel lblSelectComm = new JLabel("Select Comm ->");
-	JComboBox cboxPorts = new JComboBox();
-	JButton btnConnect = new JButton("Connect");
-	JButton btnDisconnect = new JButton("Disconnect");
-	JLabel lblStringOut = new JLabel("String out");
-	JTextField textInterval = new JTextField();
-	JTextField textOutputTest = new JTextField();
-	JLabel lblArrow = new JLabel("=>");
-	JScrollPane scrollPaneOutput = new JScrollPane();
-	JTextArea textOutputArea = new JTextArea();
-	JLabel lblInterval = new JLabel("Interval (sec):");
-	JButton btnStartComm = new JButton("START COMM");
-	JButton btnStopComm = new JButton("STOP COMM");
-	JLabel lblBerValue = new JLabel("Bit Error Rate: 0.0 %");
-	JTextArea textInputArea = new JTextArea();
-	JScrollPane scrollPaneInput = new JScrollPane();
-	JLabel lblControlPanel = new JLabel("Control Panel");
-	JTextArea textMsgArea = new JTextArea();
-	JScrollPane scrollPaneMsg = new JScrollPane();
+	public JLabel lblMainTitle = new JLabel("Underwater Communications");
+	public JLabel lblDataOut = new JLabel("Data Out");
+	public JLabel lblDataIn = new JLabel("Data In");
+	public JLabel lblSelectComm = new JLabel("Select Comm ->");
+	public JComboBox cboxPorts = new JComboBox();
+	public JButton btnConnect = new JButton("Connect");
+	public JButton btnDisconnect = new JButton("Disconnect");
+	public JLabel lblStringOut = new JLabel("String out");
+	public JTextField textInterval = new JTextField();
+	public JTextField textOutputTest = new JTextField();
+	public JLabel lblArrow = new JLabel("=>");
+	public JScrollPane scrollPaneOutput = new JScrollPane();
+	public JTextArea textOutputArea = new JTextArea();
+	public JLabel lblInterval = new JLabel("Interval (sec):");
+	public JButton btnStartComm = new JButton("START COMM");
+	public JButton btnStopComm = new JButton("STOP COMM");
+	public JLabel lblBerValue = new JLabel("Bit Error Rate: 0.0 %");
+	public JTextArea textInputArea = new JTextArea();
+	public JScrollPane scrollPaneInput = new JScrollPane();
+	public JLabel lblControlPanel = new JLabel("Control Panel");
+	public JTextArea textMsgArea = new JTextArea();
+	public JScrollPane scrollPaneMsg = new JScrollPane();
 
-	final String testMsg = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-	private final JLabel lblExperiment = new JLabel("Experiment #");
-	private final JPanel panelExperiment = new JPanel();
+	public final String testMsg = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	public final JLabel lblExperiment = new JLabel("Experiment #");
+	public final JPanel panelExperiment = new JPanel();
 	public final JRadioButton rdbtnExp1 = new JRadioButton("One");
 	public final JRadioButton rdbtnExp2 = new JRadioButton("Two");
 	public final JRadioButton rdbtnExp3 = new JRadioButton("Three");
-	private final JLabel lblParsedData = new JLabel("Parsed Data");
-	JTextArea textParsedArea = new JTextArea();
-	private final JScrollPane scrollPaneParsed = new JScrollPane();
+	public final JLabel lblParsedData = new JLabel("Parsed Data");
+	public JTextArea textParsedArea = new JTextArea();
+	public final JScrollPane scrollPaneParsed = new JScrollPane();
 	//private final JPanel panelGraph = new JPanel();
-	private final JLabel lblNetGraphRep = new JLabel("Network Graphical Representation");
+	public final JLabel lblNetGraphRep = new JLabel("Network Graphical Representation");
 
-	private boolean startComm 			= false;
-	private boolean expOneSelected 		= false;
-	private boolean expTwoSelected 		= false;
-	private boolean expThreeSelected 	= false;
-	private final JPanel panelInterval = new JPanel();
+	public boolean startComm 			= false;
+	public boolean expOneSelected 		= false;
+	public boolean expTwoSelected 		= false;
+	public boolean expThreeSelected 	= false;
+	public final JPanel panelInterval = new JPanel();
 	public final JLabel lblNumberOfTests = new JLabel("Number of Tests: 0");
-	private final JPanel panelStringOut = new JPanel();
+	public final JPanel panelStringOut = new JPanel();
 	
 	GraphicalRep animation 					= null;
 
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	/*public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -101,13 +93,14 @@ public class Gui {
 				}
 			}
 		});
-	}
+	}*/
 
+	
 	/**
 	 * Create the application.
 	 */
-	public Gui() {
-		
+	public Gui(Main main) {
+		this.main = main;
 		animation = new GraphicalRep(this);
 		animation.setForeground(new Color(0, 0, 0));
 		animation.setBorder(new LineBorder(new Color(0, 0, 0)));
@@ -118,7 +111,7 @@ public class Gui {
 	}
 
 	public void toggleControls(){
-		if (serialPortManager.getConnectionStatus()) {
+		if (main.serialPortManager.getConnectionStatus()) {
 
 			cboxPorts.setEnabled(false);
 			btnConnect.setEnabled(false);
@@ -253,20 +246,20 @@ public class Gui {
 		frame.getContentPane().add(btnConnect, gbc_btnConnect);
 		btnConnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				serialPortManager.connect();
-				if (serialPortManager.getConnectionStatus() == true)
+				main.serialPortManager.connect();
+				if (main.serialPortManager.getConnectionStatus() == true)
 				{
-					if (serialPortManager.initIOStream() == true)
+					if (main.serialPortManager.initIOStream() == true)
 					{
-						serialPortManager.initListener();
+						main.serialPortManager.initListener();
 					}
 				}
 				textOutputTest.setText(testMsg);
 				
 				//Since a thread cannot be restarted we need to recreate the same object.
-				threadMainRx = new Thread(threadManager, "Thread_Manager");
-				threadMainRx.start();
-				threadManager.runCondition = true;
+				main.threadMainRx = new Thread(main.threadManager, "Thread_Manager");
+				main.threadMainRx.start();
+				main.threadManager.runCondition = true;
 			}
 		});
 
@@ -278,22 +271,22 @@ public class Gui {
 		frame.getContentPane().add(btnDisconnect, gbc_btnDisconnect);
 		btnDisconnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				serialPortManager.disconnect();
+				main.serialPortManager.disconnect();
 				textInputArea.setText("");
 				textOutputArea.setText("");
 				try {
-					threadManager.runCondition = false;
-					if (threadMainRx != null && threadMainRx.isAlive()) {
-						threadMainRx.join();
+					main.threadManager.runCondition = false;
+					if (main.threadMainRx != null && main.threadMainRx.isAlive()) {
+						main.threadMainRx.join();
 					}
-					if (threadMainTx != null && threadMainTx.isAlive()) {
-						threadMainTx.join();
+					if (main.threadMainTx != null && main.threadMainTx.isAlive()) {
+						main.threadMainTx.join();
 					}
-					if (threadMainTx2 != null && threadMainTx2.isAlive()) {
-						threadMainTx2.join();
+					if (main.threadMainTx2 != null && main.threadMainTx2.isAlive()) {
+						main.threadMainTx2.join();
 					} 
-					if (threadProtocol != null && threadProtocol.isAlive()) {
-						threadProtocol.join();
+					if (main.threadProtocol != null && main.threadProtocol.isAlive()) {
+						main.threadProtocol.join();
 					}
 				} catch (InterruptedException e1) {
 					e1.printStackTrace();
@@ -438,8 +431,8 @@ public class Gui {
 					setExpThreeSelected(false);
 					textMsgArea.append("Starting Experiment 1!!\n");
 					//serialPortManager.sendData(textOutputTest.getText());		
-					threadMainTx = new Thread(experOne, "Experiment_One");
-					threadMainTx.start();
+					main.threadMainTx = new Thread(main.experOne, "Experiment_One");
+					main.threadMainTx.start();
 
 				} else if (rdbtnExp2.isSelected()) {
 					setExpOneSelected(false);
@@ -447,8 +440,8 @@ public class Gui {
 					setExpThreeSelected(false);
 					
 					textMsgArea.append("Starting Experiment 2!!\n");
-					threadMainTx2 = new Thread(experTwo, "Experiment_Two");
-					threadMainTx2.start();
+					main.threadMainTx2 = new Thread(main.experTwo, "Experiment_Two");
+					main.threadMainTx2.start();
 
 				} else if (rdbtnExp3.isSelected()) {
 					setExpOneSelected(false);
@@ -456,8 +449,8 @@ public class Gui {
 					setExpThreeSelected(true);
 					
 					textMsgArea.append("Starting Experiment 3!!\n");
-					threadProtocol = new Thread(networkProtocol, "Network_Protocol");
-					threadProtocol.start();
+					main.threadProtocol = new Thread(main.networkProtocol, "Network_Protocol");
+					main.threadProtocol.start();
 				}
 
 			}
