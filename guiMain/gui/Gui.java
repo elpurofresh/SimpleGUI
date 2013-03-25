@@ -27,7 +27,7 @@ import main.Main;
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
 public class Gui {
-	
+
 	Main main = null;
 
 	private JFrame frame;
@@ -71,10 +71,10 @@ public class Gui {
 	public boolean expOneSelected 		= false;
 	public boolean expTwoSelected 		= false;
 	public boolean expThreeSelected 	= false;
-	public final JPanel panelInterval = new JPanel();
+	public final JPanel panelInterval 	= new JPanel();
 	public final JLabel lblNumberOfTests = new JLabel("Number of Tests: 0");
 	public final JPanel panelStringOut = new JPanel();
-	
+
 	GraphicalRep animation 					= null;
 
 	/**
@@ -95,13 +95,13 @@ public class Gui {
 		});
 	}*/
 
-	
+
 	/**
 	 * Create the application.
 	 */
 	public Gui(Main main) {
 		this.main = main;
-		
+
 		animation = new GraphicalRep(main);
 		animation.setForeground(new Color(0, 0, 0));
 		animation.setBorder(new LineBorder(new Color(0, 0, 0)));
@@ -139,7 +139,7 @@ public class Gui {
 			textOutputTest.setEnabled(false);
 			textInterval.setEnabled(false);
 			lblNumberOfTests.setText("Number of Tests: 0");
-			
+
 			rdbtnExp1.setEnabled(false);
 			rdbtnExp1.setSelected(false);
 			rdbtnExp2.setEnabled(false);
@@ -159,8 +159,8 @@ public class Gui {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 1207, 605);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setVisible(true);
 		
+
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{160, 80, 25, 200, 200, 200, 200};
 		gridBagLayout.rowHeights = new int[]{10, 5, 1, 85, 0, 0, 0, 5, 0, 0, 0, 0};
@@ -256,7 +256,7 @@ public class Gui {
 					}
 				}
 				textOutputTest.setText(testMsg);
-				
+
 				//Since a thread cannot be restarted we need to recreate the same object.
 				main.threadMainRx = new Thread(main.threadManager, "Thread_Manager");
 				main.threadMainRx.start();
@@ -294,7 +294,7 @@ public class Gui {
 				}
 			}
 		});
-		
+
 		GridBagConstraints gbc_panelStringOut = new GridBagConstraints();
 		gbc_panelStringOut.gridwidth = 2;
 		gbc_panelStringOut.insets = new Insets(0, 0, 5, 5);
@@ -306,18 +306,17 @@ public class Gui {
 		panelStringOut.add(lblStringOut);
 		frame.getContentPane().setFocusTraversalPolicy(new FocusTraversalOnArray(new Component[]{lblDataOut, lblDataIn, textOutputTest}));
 		panelStringOut.add(textOutputTest);
-		
-		
-				textOutputTest.setText(testMsg);
-				textOutputTest.setColumns(25);
-				textOutputTest.addFocusListener(new FocusAdapter() {
-					@Override
-					public void focusGained(FocusEvent evt) {
-						//	if (evt.getSource() == textOutputTest) {
-						textOutputTest.setText("");
-						//	}
-					}
-				});
+
+		textOutputTest.setText(testMsg);
+		textOutputTest.setColumns(25);
+		textOutputTest.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent evt) {
+				//	if (evt.getSource() == textOutputTest) {
+				textOutputTest.setText("");
+				//	}
+			}
+		});
 
 
 		GridBagConstraints gbc_lblArrow = new GridBagConstraints();
@@ -337,7 +336,7 @@ public class Gui {
 		scrollPaneOutput.setViewportView(textOutputArea);
 		textOutputArea.setRows(9);
 		textOutputArea.setColumns(10);
-		
+
 		GridBagConstraints gbc_panelInterval = new GridBagConstraints();
 		gbc_panelInterval.insets = new Insets(0, 0, 5, 5);
 		gbc_panelInterval.fill = GridBagConstraints.BOTH;
@@ -347,16 +346,16 @@ public class Gui {
 		panelInterval.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		panelInterval.add(lblInterval);
 		panelInterval.add(textInterval);
-		
-		
-				textInterval.addFocusListener(new FocusAdapter() {
-					@Override
-					public void focusGained(FocusEvent e) {
-					}
-				});
-				textInterval.setText("5");
-				textInterval.setColumns(5);
-		
+
+
+		textInterval.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusGained(FocusEvent e) {
+			}
+		});
+		textInterval.setText("5");
+		textInterval.setColumns(5);
+
 		GridBagConstraints gbc_lblNumberOfTests = new GridBagConstraints();
 		gbc_lblNumberOfTests.anchor = GridBagConstraints.WEST;
 		gbc_lblNumberOfTests.insets = new Insets(0, 0, 5, 5);
@@ -439,7 +438,7 @@ public class Gui {
 					setExpOneSelected(false);
 					setExpTwoSelected(true);
 					setExpThreeSelected(false);
-					
+
 					textMsgArea.append("Starting Experiment 2!!\n");
 					main.threadMainTx2 = new Thread(main.experTwo, "Experiment_Two");
 					main.threadMainTx2.start();
@@ -448,7 +447,7 @@ public class Gui {
 					setExpOneSelected(false);
 					setExpTwoSelected(false);
 					setExpThreeSelected(true);
-					
+
 					textMsgArea.append("Starting Experiment 3!!\n");
 					main.threadProtocol = new Thread(main.networkProtocol, "Network_Protocol");
 					main.threadProtocol.start();
@@ -456,7 +455,6 @@ public class Gui {
 
 			}
 		});
-
 
 		GridBagConstraints gbc_btnStopComm = new GridBagConstraints();
 		gbc_btnStopComm.fill = GridBagConstraints.HORIZONTAL;
@@ -469,13 +467,13 @@ public class Gui {
 				setStartComm(false);
 			}
 		});
-		
-				GridBagConstraints gbc_label_1BerValue = new GridBagConstraints();
-				gbc_label_1BerValue.anchor = GridBagConstraints.WEST;
-				gbc_label_1BerValue.insets = new Insets(0, 0, 5, 5);
-				gbc_label_1BerValue.gridx = 3;
-				gbc_label_1BerValue.gridy = 8;
-				frame.getContentPane().add(lblBerValue, gbc_label_1BerValue);
+
+		GridBagConstraints gbc_label_1BerValue = new GridBagConstraints();
+		gbc_label_1BerValue.anchor = GridBagConstraints.WEST;
+		gbc_label_1BerValue.insets = new Insets(0, 0, 5, 5);
+		gbc_label_1BerValue.gridx = 3;
+		gbc_label_1BerValue.gridy = 8;
+		frame.getContentPane().add(lblBerValue, gbc_label_1BerValue);
 
 		GridBagConstraints gbc_lblParsedData = new GridBagConstraints();
 		gbc_lblParsedData.gridwidth = 3;
@@ -509,6 +507,8 @@ public class Gui {
 		/*System.out.println(animation.getPreferredSize());
 		animation.setSize(animation.getPreferredSize());
 		panelGraph.add(animation);*/
+		
+		frame.setVisible(true);
 	}
 
 	public boolean isStartComm() {

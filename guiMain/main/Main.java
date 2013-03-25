@@ -8,7 +8,7 @@ import backend.ThreadManager;
 
 public class Main {
 	
-	public Gui	gui								= null;
+	public Gui gui								= null;
 	public SerialPortManager serialPortManager 	= null;
 	public NetworkProtocol networkProtocol		= null;
 	public Thread threadMainRx					= null;
@@ -22,8 +22,8 @@ public class Main {
 	
 	public Main(){
 		
-		gui = new Gui(this);
 		serialPortManager = new SerialPortManager(this);
+		gui = new Gui(this);
 		serialPortManager.searchForPorts();
 		networkProtocol = new NetworkProtocol(this);
 		
@@ -38,6 +38,7 @@ public class Main {
 		
 		experOne = new ExperimentOne(this);
 		experTwo = new ExperimentTwo(this);
+		
 		
 	}
 

@@ -102,12 +102,16 @@ public class SerialPortManager implements SerialPortEventListener{
 	public void searchForPorts(){
 		ports = CommPortIdentifier.getPortIdentifiers();
 
+		if (!ports.hasMoreElements()) {
+			main.gui.cboxPorts.addItem("No Serial Ports");
+		}
+		
 		while (ports.hasMoreElements()) {
 			CommPortIdentifier currentPort = (CommPortIdentifier) ports.nextElement();
 			if (currentPort.getPortType() == CommPortIdentifier.PORT_SERIAL) {
 				main.gui.cboxPorts.addItem(currentPort.getName());
 				portMap.put(currentPort.getName(), currentPort);
-			}
+			} 
 		}
 	}
 
