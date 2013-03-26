@@ -26,9 +26,15 @@ import main.Main;
 
 import org.eclipse.wb.swing.FocusTraversalOnArray;
 
-public class Gui {
+import pinger.EventClass;
+import pinger.EventClassListener;
+import pinger.EventSource;
+
+public class Gui implements EventClassListener{
 
 	Main main = null;
+	EventSource event = null;
+
 
 	private JFrame frame;
 
@@ -75,7 +81,7 @@ public class Gui {
 	public final JLabel lblNumberOfTests = new JLabel("Number of Tests: 0");
 	public final JPanel panelStringOut = new JPanel();
 
-	GraphicalRep animation 					= null;
+	public GraphicalRep animation 					= null;
 
 	/**
 	 * Launch the application.
@@ -101,11 +107,12 @@ public class Gui {
 	 */
 	public Gui(Main main) {
 		this.main = main;
+		event = new EventSource();
 
 		animation = new GraphicalRep(main);
 		animation.setForeground(new Color(0, 0, 0));
-		animation.setBorder(new LineBorder(new Color(0, 0, 0)));
-		animation.setBackground(Color.WHITE);
+		animation.setBorder(new LineBorder(new Color(0, 0, 0), 2));
+		animation.setBackground(Color.LIGHT_GRAY);
 		initialize();
 		toggleControls();
 	}
@@ -159,7 +166,7 @@ public class Gui {
 		frame = new JFrame();
 		frame.setBounds(100, 100, 1207, 605);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
+
 
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{160, 80, 25, 200, 200, 200, 200};
@@ -256,6 +263,7 @@ public class Gui {
 					}
 				}
 				textOutputTest.setText(testMsg);
+				animation.updateMasterNodePic("Idle");
 
 				//Since a thread cannot be restarted we need to recreate the same object.
 				main.threadMainRx = new Thread(main.threadManager, "Thread_Manager");
@@ -270,8 +278,12 @@ public class Gui {
 		gbc_btnDisconnect.gridx = 1;
 		gbc_btnDisconnect.gridy = 4;
 		frame.getContentPane().add(btnDisconnect, gbc_btnDisconnect);
+
 		btnDisconnect.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+
+
+
 				main.serialPortManager.disconnect();
 				textInputArea.setText("");
 				textOutputArea.setText("");
@@ -507,7 +519,7 @@ public class Gui {
 		/*System.out.println(animation.getPreferredSize());
 		animation.setSize(animation.getPreferredSize());
 		panelGraph.add(animation);*/
-		
+
 		frame.setVisible(true);
 	}
 
@@ -541,5 +553,13 @@ public class Gui {
 
 	public void setExpThreeSelected(boolean expThreeSelected) {
 		this.expThreeSelected = expThreeSelected;
+	}
+
+	@Override
+	public void eventOccurred(EventClass e) {
+
+		if (e == (EventClassListener) btnStopComm) {
+			System.out.println("Stop communications");
+		}
 	}
 }

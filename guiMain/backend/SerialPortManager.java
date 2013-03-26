@@ -102,9 +102,6 @@ public class SerialPortManager implements SerialPortEventListener{
 	public void searchForPorts(){
 		ports = CommPortIdentifier.getPortIdentifiers();
 
-		if (!ports.hasMoreElements()) {
-			main.gui.cboxPorts.addItem("No Serial Ports");
-		}
 		
 		while (ports.hasMoreElements()) {
 			CommPortIdentifier currentPort = (CommPortIdentifier) ports.nextElement();
@@ -112,6 +109,9 @@ public class SerialPortManager implements SerialPortEventListener{
 				main.gui.cboxPorts.addItem(currentPort.getName());
 				portMap.put(currentPort.getName(), currentPort);
 			} 
+		}
+		if (!ports.hasMoreElements()) {
+			main.gui.cboxPorts.addItem("No Serial Ports");
 		}
 	}
 
@@ -261,6 +261,7 @@ public class SerialPortManager implements SerialPortEventListener{
 		}  else {
 			netText[byteCounter++] = val;
 			main.gui.textInputArea.append(str);
+			main.gui.animation.updateMasterNodePic("Receiving");
 			//System.out.print(new String(netText));
 		}
 

@@ -14,7 +14,7 @@ public class NetworkProtocol implements Runnable{
 	private final static int MAX_NUM_PARAMS 	= 10;
 	//private final static int MasterNodeId 		= 0;	// '0'
 	private final static int NULL 				= -1;
-	private final static int timePerInterval 	= 5;  //seconds
+	private final static int timePerInterval 	= 2;  //seconds
 	//private final static int SELF_NETWORK_DATA 	= 1;
 	//private final static int SELF_N_CHILD_DATA 	= 2;
 
@@ -23,7 +23,7 @@ public class NetworkProtocol implements Runnable{
 	public static boolean successPcktRxd 			= false;
 	public static boolean myChildrenSntDataSuccess 	= false;
 
-	public static int numNodes 			= 5;
+	public static int numNodes 			= 1;
 	public static int myTimeSlotCounter = 0;
 	public static int myTimeSlotMax 	= 2*(numNodes*numNodes)-1;
 
@@ -96,7 +96,8 @@ public class NetworkProtocol implements Runnable{
 					timeResult = (int) ((System.currentTimeMillis()/1000) %timePerInterval);
 
 					try {
-						System.out.println("Result: " + timeResult);
+						System.out.println("Sending new package in: " + timeResult);
+						main.gui.textOutputArea.append("Sending new package in: " + timeResult + "\n");
 						Thread.sleep(1000);
 					} catch (InterruptedException e) {
 						System.out.println("Interval-> " + main.threadProtocol.getName() + " 's status is: " + main.threadProtocol.getState());
